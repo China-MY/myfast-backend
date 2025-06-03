@@ -1,5 +1,5 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, Query, Path, Body, HTTPException
+from fastapi import APIRouter, Depends, Query, Path, Body, HTTPException, Response
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
@@ -7,142 +7,29 @@ from app.core.deps import get_current_active_user
 from app.domain.models.system.user import SysUser
 from app.domain.schemas.system.user import UserCreate, UserUpdate, UserInfo, UserQuery
 from app.common.response import success, error, page
-from app.service.system.user_service import (
-    get_user, get_users, create_user, update_user, 
-    delete_user, reset_password
-)
+from app.common.rest import RestApiBase
+from app.service.system.user_service import user_service
 
 router = APIRouter()
 
+# 创建RESTful API控制器
+user_api = RestApiBase(
+    router=router,
+    service=user_service,
+    prefix="users",
+    create_schema=UserCreate,
+    update_schema=UserUpdate,
+    query_schema=UserQuery,
+    tags=["用户管理"],
+    id_field="user_id",
+    auth_required=True
+)
 
-@router.get("/list", summary="获取用户列表")
-async def get_user_list(
-    db: Session = Depends(get_db),
-    current_user: SysUser = Depends(get_current_active_user),
-    params: UserQuery = Depends(),
-):
-    """
-    获取用户列表（分页查询）
-    """
-    try:
-        users, total = get_users(db, params)
-        # 这里需要转换为符合前端格式的数据
-        user_list = [
-            {
-                "user_id": user.user_id,
-                "username": user.username,
-                "nickname": user.nickname,
-                "dept_id": user.dept_id,
-                "email": user.email,
-                "phonenumber": user.phonenumber,
-                "status": user.status,
-                "create_time": user.create_time,
-                # 这里需要处理关联的部门、角色、岗位信息
-            }
-            for user in users
-        ]
-        return page(rows=user_list, total=total)
-    except Exception as e:
-        return error(msg=str(e))
+# 添加自定义端点
 
-
-@router.get("/info/{user_id}", summary="获取用户详情")
-async def get_user_info(
-    user_id: int = Path(..., description="用户ID"),
-    db: Session = Depends(get_db),
-    current_user: SysUser = Depends(get_current_active_user),
-):
-    """
-    获取用户详情
-    """
-    try:
-        user = get_user(db, user_id)
-        if not user:
-            return error(msg="用户不存在", code=404)
-        # 这里需要转换为符合前端格式的数据，包含角色、岗位等信息
-        user_info = {
-            "user_id": user.user_id,
-            "username": user.username,
-            "nickname": user.nickname,
-            "dept_id": user.dept_id,
-            "email": user.email,
-            "phonenumber": user.phonenumber,
-            "sex": user.sex,
-            "status": user.status,
-            "remark": user.remark,
-            "create_time": user.create_time,
-            # 这里需要处理关联的部门、角色、岗位信息
-            "roles": [],
-            "posts": []
-        }
-        return success(data=user_info)
-    except Exception as e:
-        return error(msg=str(e))
-
-
-@router.post("/add", summary="添加用户")
-async def add_user(
-    user_data: UserCreate = Body(...),
-    db: Session = Depends(get_db),
-    current_user: SysUser = Depends(get_current_active_user),
-):
-    """
-    添加用户
-    """
-    try:
-        user = create_user(db, user_data)
-        return success(msg="用户添加成功")
-    except ValueError as e:
-        return error(msg=str(e), code=400)
-    except Exception as e:
-        return error(msg=str(e))
-
-
-@router.put("/edit", summary="修改用户")
-async def edit_user(
-    user_data: UserUpdate = Body(...),
-    db: Session = Depends(get_db),
-    current_user: SysUser = Depends(get_current_active_user),
-):
-    """
-    修改用户
-    """
-    try:
-        user = update_user(db, user_data.user_id, user_data)
-        return success(msg="用户修改成功")
-    except ValueError as e:
-        return error(msg=str(e), code=400)
-    except HTTPException as e:
-        return error(msg=e.detail, code=e.status_code)
-    except Exception as e:
-        return error(msg=str(e))
-
-
-@router.delete("/remove/{user_id}", summary="删除用户")
-async def remove_user(
-    user_id: int = Path(..., description="用户ID"),
-    db: Session = Depends(get_db),
-    current_user: SysUser = Depends(get_current_active_user),
-):
-    """
-    删除用户
-    """
-    try:
-        # 不允许删除自己
-        if current_user.user_id == user_id:
-            return error(msg="不能删除当前登录用户", code=400)
-        
-        result = delete_user(db, user_id)
-        return success(msg="用户删除成功")
-    except HTTPException as e:
-        return error(msg=e.detail, code=e.status_code)
-    except Exception as e:
-        return error(msg=str(e))
-
-
-@router.put("/resetPwd", summary="重置用户密码")
+@router.put("/users/{user_id}/password", summary="重置用户密码")
 async def reset_user_password(
-    user_id: int = Body(..., embed=True),
+    user_id: int = Path(..., description="用户ID"),
     new_password: str = Body(..., embed=True),
     db: Session = Depends(get_db),
     current_user: SysUser = Depends(get_current_active_user),
@@ -151,9 +38,72 @@ async def reset_user_password(
     重置用户密码
     """
     try:
-        result = reset_password(db, user_id, new_password)
+        result = user_service.reset_password(db, user_id, new_password)
         return success(msg="密码重置成功")
     except HTTPException as e:
         return error(msg=e.detail, code=e.status_code)
+    except Exception as e:
+        return error(msg=str(e))
+
+@router.get("/users/profile", summary="获取当前用户信息")
+async def get_current_user_profile(
+    db: Session = Depends(get_db),
+    current_user: SysUser = Depends(get_current_active_user),
+):
+    """
+    获取当前登录用户信息
+    """
+    try:
+        user = user_service.get_by_id(db, current_user.user_id)
+        if not user:
+            return error(msg="用户不存在", code=404)
+        
+        # 构建用户信息
+        user_info = {
+            "user_id": user.user_id,
+            "username": user.username,
+            "nickname": user.nickname,
+            "email": user.email,
+            "avatar": user.avatar,
+            "phonenumber": user.phonenumber,
+            "sex": user.sex,
+            "status": user.status,
+            "dept": None,  # 需要关联部门信息
+            "roles": [],   # 需要关联角色信息
+            "permissions": []  # 需要关联权限信息
+        }
+        
+        return success(data=user_info)
+    except Exception as e:
+        return error(msg=str(e))
+
+@router.get("/info", summary="获取用户信息")
+async def get_user_info(
+    db: Session = Depends(get_db),
+    current_user: SysUser = Depends(get_current_active_user),
+):
+    """
+    获取当前登录用户信息（前端调用）
+    """
+    try:
+        user = user_service.get_by_id(db, current_user.user_id)
+        if not user:
+            return error(msg="用户不存在", code=404)
+        
+        # 构建用户信息
+        user_info = {
+            "userId": user.user_id,
+            "username": user.username,
+            "nickname": user.nickname,
+            "email": user.email,
+            "avatar": user.avatar,
+            "phonenumber": user.phonenumber,
+            "sex": user.sex,
+            "status": user.status,
+            "roles": ["admin"],   # 临时添加管理员角色
+            "permissions": ["*"]  # 临时添加所有权限
+        }
+        
+        return success(data=user_info)
     except Exception as e:
         return error(msg=str(e)) 

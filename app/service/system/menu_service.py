@@ -8,6 +8,11 @@ from app.domain.schemas.system.menu import MenuCreate, MenuUpdate, MenuInfo, Men
 from app.common.constants import MenuType
 from app.common.exception import NotFound
 
+from fastapi import HTTPException, status
+from app.crud.menu import menu as menu_crud
+from app.models.menu import Menu
+from app.schemas.menu import RouterVo
+
 
 def get_menu(db: Session, menu_id: int) -> Optional[SysMenu]:
     """
@@ -218,3 +223,190 @@ def build_router_tree(menus: List[SysMenu], parent_id: int = 0) -> List[Dict[str
             routers.append(router)
     
     return routers 
+
+
+class MenuService:
+    @staticmethod
+    def get_menu_by_id(db: Session, menu_id: int) -> Optional[Menu]:
+        """获取菜单信息"""
+        menu = menu_crud.get_by_id(db, menu_id)
+        if not menu:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="菜单不存在"
+            )
+        return menu
+
+    @staticmethod
+    def get_menu_list(
+        db: Session,
+        menu_name: Optional[str] = None,
+        status: Optional[str] = None
+    ) -> List[Menu]:
+        """获取菜单列表"""
+        return menu_crud.get_menu_list(db, menu_name=menu_name, status=status)
+
+    @staticmethod
+    def create_menu(db: Session, menu_in: MenuCreate) -> Menu:
+        """创建菜单"""
+        # 检查父菜单是否存在
+        if menu_in.parent_id != 0:
+            parent_menu = menu_crud.get_by_id(db, menu_in.parent_id)
+            if not parent_menu:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"父菜单ID {menu_in.parent_id} 不存在"
+                )
+            
+            # 如果父菜单是按钮，则不能添加子菜单
+            if parent_menu.menu_type == "F":
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="不能在按钮下添加子菜单"
+                )
+        
+        # 验证菜单名称在同级菜单下的唯一性
+        if menu_crud.get_by_name(db, menu_name=menu_in.menu_name, parent_id=menu_in.parent_id):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"菜单名称 {menu_in.menu_name} 已存在"
+            )
+            
+        # 创建菜单
+        return menu_crud.create(db, obj_in=menu_in)
+
+    @staticmethod
+    def update_menu(db: Session, menu_id: int, menu_in: MenuUpdate) -> Menu:
+        """更新菜单"""
+        # 检查菜单是否存在
+        db_menu = menu_crud.get_by_id(db, menu_id)
+        if not db_menu:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="菜单不存在"
+            )
+        
+        # 不能将菜单的父ID设置为自己或其子菜单ID
+        if menu_in.parent_id and menu_in.parent_id != 0 and menu_in.parent_id != db_menu.parent_id:
+            # 检查是否是自己
+            if menu_in.parent_id == menu_id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="父菜单不能选择自己"
+                )
+                
+            # 检查是否是自己的子菜单
+            child_menus = menu_crud.get_children_by_parent_id(db, menu_id)
+            child_ids = [menu.menu_id for menu in child_menus]
+            if menu_in.parent_id in child_ids:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="父菜单不能设置为子菜单"
+                )
+                
+            # 检查父菜单是否存在
+            parent_menu = menu_crud.get_by_id(db, menu_in.parent_id)
+            if not parent_menu:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"父菜单ID {menu_in.parent_id} 不存在"
+                )
+                
+            # 如果父菜单是按钮，则不能作为父菜单
+            if parent_menu.menu_type == "F":
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="不能在按钮下添加子菜单"
+                )
+        
+        # 验证菜单名称在同级菜单下的唯一性
+        if menu_in.menu_name and menu_in.menu_name != db_menu.menu_name:
+            parent_id = menu_in.parent_id if menu_in.parent_id is not None else db_menu.parent_id
+            if menu_crud.get_by_name(db, menu_name=menu_in.menu_name, parent_id=parent_id):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"菜单名称 {menu_in.menu_name} 已存在"
+                )
+                
+        # 更新菜单
+        return menu_crud.update(db, db_obj=db_menu, obj_in=menu_in)
+
+    @staticmethod
+    def delete_menu(db: Session, menu_id: int) -> None:
+        """删除菜单"""
+        # 检查菜单是否存在
+        db_menu = menu_crud.get_by_id(db, menu_id)
+        if not db_menu:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="菜单不存在"
+            )
+            
+        # 检查是否有子菜单
+        if menu_crud.has_children(db, menu_id):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="存在子菜单,不允许删除"
+            )
+            
+        # 删除菜单
+        menu_crud.remove(db, id=menu_id)
+
+    @staticmethod
+    def get_router_tree(db: Session, user_id: int, is_admin: bool = False) -> List[Dict[str, Any]]:
+        """获取路由树"""
+        # 获取菜单路由树
+        return menu_crud.get_router_tree(db, user_id=user_id, is_admin=is_admin)
+
+    @staticmethod
+    def get_menu_permission_tree(db: Session) -> List[Dict[str, Any]]:
+        """获取菜单权限树"""
+        return menu_crud.get_menu_permission_tree(db)
+
+    @staticmethod
+    def get_menu_tree_select(db: Session) -> List[Dict[str, Any]]:
+        """获取菜单下拉树"""
+        # 获取所有菜单
+        menus = menu_crud.get_menu_list(db)
+        
+        # 构建菜单树
+        return MenuService._build_tree_select(menus)
+    
+    @staticmethod
+    def _build_tree_select(menus: List[Menu], parent_id: int = 0) -> List[Dict[str, Any]]:
+        """构建菜单下拉树"""
+        tree = []
+        for menu in [m for m in menus if m.parent_id == parent_id]:
+            menu_dict = {
+                "id": menu.menu_id,
+                "label": menu.menu_name,
+            }
+            
+            # 处理子菜单
+            children = MenuService._build_tree_select(menus, menu.menu_id)
+            if children:
+                menu_dict["children"] = children
+                
+            tree.append(menu_dict)
+                
+        return tree
+
+    @staticmethod
+    def get_role_menu_tree_select(db: Session, role_id: int) -> Dict[str, Any]:
+        """获取角色的菜单树选择数据"""
+        # 获取所有菜单
+        menus = menu_crud.get_menu_list(db)
+        
+        # 构建菜单树
+        menu_tree = MenuService._build_tree_select(menus)
+        
+        # 获取角色菜单ID列表
+        checked_keys = menu_crud.get_role_menu_ids(db, role_id)
+        
+        return {
+            "menus": menu_tree,
+            "checkedKeys": checked_keys
+        }
+        
+
+menu_service = MenuService() 

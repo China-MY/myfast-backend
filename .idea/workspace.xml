@@ -5,8 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a0c2172a-e9ef-42da-a8de-d9ba53ff549d" name="更改" comment="20250602-添加注释">
-      <change afterPath="$PROJECT_DIR$/app/api/auth/register.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/auth/login.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/auth/login.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/system/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/system/user.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/config/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/config/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/core/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/core/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/core/security.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/core/security.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/service/system/menu_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/service/system/menu_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/service/system/role_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/service/system/role_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/service/system/user_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/service/system/user_service.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -103,6 +111,10 @@
       <workItem from="1748846797950" duration="395000" />
       <workItem from="1748871311595" duration="15000" />
       <workItem from="1748871444269" duration="2778000" />
+      <workItem from="1748910739046" duration="1619000" />
+      <workItem from="1748914658074" duration="4459000" />
+      <workItem from="1748924554842" duration="2166000" />
+      <workItem from="1748941364501" duration="646000" />
     </task>
     <task id="LOCAL-00001" summary="20250602-添加注释">
       <option name="closed" value="true" />
@@ -135,6 +147,6 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/myfast_backend$main__1_.coverage" NAME="main (1) 覆盖结果" MODIFIED="1748752600531" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
-    <SUITE FILE_PATH="coverage/myfast_backend$main.coverage" NAME="main 覆盖结果" MODIFIED="1748872042277" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
+    <SUITE FILE_PATH="coverage/myfast_backend$main.coverage" NAME="main 覆盖结果" MODIFIED="1748918561987" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
   </component>
 </project>

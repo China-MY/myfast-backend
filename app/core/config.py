@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     SERVER_HOST: AnyHttpUrl = "http://localhost:8000"
     
     # 跨域设置
-    BACKEND_CORS_ORIGINS: List[str] = ["*"]
+    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = ["http://localhost:8000", "http://localhost:3000", "http://localhost:8080"]
 
     @validator("BACKEND_CORS_ORIGINS", pre=True)
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
@@ -23,28 +23,40 @@ class Settings(BaseSettings):
             return v
         raise ValueError(v)
 
-    PROJECT_NAME: str = "MyFast"
-    DESCRIPTION: str = "企业级后台管理系统"
-    VERSION: str = "0.1.0"
+    PROJECT_NAME: str = "MyFastAPI Admin"
+    PROJECT_DESCRIPTION: str = "企业级后台管理系统"
+    PROJECT_VERSION: str = "0.1.0"
     
+    MYSQL_SERVER: str = "localhost"
+    MYSQL_USER: str = "root"
+    MYSQL_PASSWORD: str = "123456"
+    MYSQL_DB: str = "myfast_admin"
+    MYSQL_PORT: str = "3306"
+    SQLALCHEMY_DATABASE_URI: Optional[str] = None
+
+    @validator("SQLALCHEMY_DATABASE_URI", pre=True)
+    def assemble_db_connection(cls, v: Optional[str], values: Dict[str, Any]) -> Any:
+        if isinstance(v, str):
+            return v
+        return f"mysql+pymysql://{values.get('MYSQL_USER')}:{values.get('MYSQL_PASSWORD')}@{values.get('MYSQL_SERVER')}:{values.get('MYSQL_PORT')}/{values.get('MYSQL_DB')}"
+
     # Redis配置
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
     REDIS_DB: int = 0
-    REDIS_PASSWORD: str = "123456"
-    
-    # 数据库连接配置
-    SQLALCHEMY_DATABASE_URI: str = "mysql+pymysql://root:123456@localhost:3306/fastapi"
+    REDIS_PASSWORD: str = ""
     
     # JWT配置
-    JWT_SECRET_KEY: str = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
+    JWT_SECRET_KEY: str = "myfast-admin-jwt-secret-key"
     JWT_ALGORITHM: str = "HS256"
     
-    # 静态文件
-    STATIC_DIR: str = "static"
+    # 上传文件配置
+    UPLOAD_FOLDER: str = "uploads"
+    MAX_CONTENT_LENGTH: int = 16 * 1024 * 1024  # 16MB
     
     class Config:
         case_sensitive = True
+        env_file = ".env"
 
 
 settings = Settings() 

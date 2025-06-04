@@ -1,21 +1,36 @@
+import os
 import secrets
-from typing import Any, Dict, List, Optional, Union
-from pydantic import AnyHttpUrl, validator
+from typing import List, Optional, Union, Dict, Any
+
+from pydantic import AnyHttpUrl, field_validator, ValidationInfo
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    # API配置
     API_V1_STR: str = "/api/v1"
-    SECRET_KEY: str = secrets.token_urlsafe(32)
-    # 60 minutes * 24 hours * 8 days = 8 days
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
-    SERVER_NAME: str = "FastAPI"
-    SERVER_HOST: AnyHttpUrl = "http://localhost:8000"
+    PROJECT_NAME: str = "MyFastAPI-Admin"
+    DESCRIPTION: str = "FastAPI企业级后台管理系统"
+    VERSION: str = "1.0.0"
     
-    # 跨域设置
-    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = ["http://localhost:8000", "http://localhost:3000", "http://localhost:8080"]
+    # 文档配置
+    DOCS_URL: str = "/docs"
+    OPENAPI_URL: str = "/openapi.json"
+    REDOC_URL: str = "/redoc"
+    
+    # 安全配置
+    SECRET_KEY: str = secrets.token_hex(32)
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 1天
+    
+    # 数据库配置
+    DATABASE_URL: str = "mysql+pymysql://root:123456@localhost:3306/myfast_admin"
+    
+    # CORS配置
+    BACKEND_CORS_ORIGINS: List[str] = ["*"]
 
-    @validator("BACKEND_CORS_ORIGINS", pre=True)
+    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
+    @classmethod
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
         if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",")]
@@ -23,36 +38,8 @@ class Settings(BaseSettings):
             return v
         raise ValueError(v)
 
-    PROJECT_NAME: str = "MyFastAPI Admin"
-    PROJECT_DESCRIPTION: str = "企业级后台管理系统"
-    PROJECT_VERSION: str = "0.1.0"
-    
-    MYSQL_SERVER: str = "localhost"
-    MYSQL_USER: str = "root"
-    MYSQL_PASSWORD: str = "123456"
-    MYSQL_DB: str = "myfast_admin"
-    MYSQL_PORT: str = "3306"
-    SQLALCHEMY_DATABASE_URI: Optional[str] = None
-
-    @validator("SQLALCHEMY_DATABASE_URI", pre=True)
-    def assemble_db_connection(cls, v: Optional[str], values: Dict[str, Any]) -> Any:
-        if isinstance(v, str):
-            return v
-        return f"mysql+pymysql://{values.get('MYSQL_USER')}:{values.get('MYSQL_PASSWORD')}@{values.get('MYSQL_SERVER')}:{values.get('MYSQL_PORT')}/{values.get('MYSQL_DB')}"
-
-    # Redis配置
-    REDIS_HOST: str = "localhost"
-    REDIS_PORT: int = 6379
-    REDIS_DB: int = 0
-    REDIS_PASSWORD: str = ""
-    
-    # JWT配置
-    JWT_SECRET_KEY: str = "myfast-admin-jwt-secret-key"
-    JWT_ALGORITHM: str = "HS256"
-    
-    # 上传文件配置
-    UPLOAD_FOLDER: str = "uploads"
-    MAX_CONTENT_LENGTH: int = 16 * 1024 * 1024  # 16MB
+    # 日志配置
+    LOGGING_LEVEL: str = "INFO"
     
     class Config:
         case_sensitive = True

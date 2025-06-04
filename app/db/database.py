@@ -2,19 +2,20 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from app.config import settings
+from app.core.config import settings
 
-# 创建数据库引擎
+# 创建连接引擎
 engine = create_engine(
-    settings.SQLALCHEMY_DATABASE_URI,
-    echo=settings.APP_DEBUG,
+    settings.DATABASE_URI,
+    echo=False,
     pool_pre_ping=True,
+    pool_recycle=3600,
 )
 
 # 创建会话工厂
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# 创建基础模型类
+# 创建模型基类
 Base = declarative_base()
 
 # 获取数据库会话

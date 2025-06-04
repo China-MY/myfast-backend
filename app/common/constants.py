@@ -1,61 +1,61 @@
-"""系统常量定义"""
+"""
+系统常量定义
+"""
+from enum import Enum
 
-# 用户类型
-class UserType:
-    """用户类型常量"""
-    # 系统用户
-    SYSTEM = "00"
-    # 普通用户
-    NORMAL = "01"
 
-# 用户状态
-class UserStatus:
-    """用户状态常量"""
-    # 正常
-    NORMAL = "0"
-    # 停用
-    DISABLE = "1"
+class StatusEnum(str, Enum):
+    """状态枚举"""
+    NORMAL = "0"  # 正常
+    DISABLE = "1"  # 停用
 
-# 删除标志
-class DelFlag:
-    """删除标志常量"""
-    # 正常
-    NORMAL = "0"
-    # 删除
-    DELETE = "2"
 
-# 菜单类型
-class MenuType:
-    """菜单类型常量"""
-    # 目录
-    DIRECTORY = "M"
-    # 菜单
-    MENU = "C"
-    # 按钮
-    BUTTON = "F"
+class UserStatusEnum(str, Enum):
+    """用户状态枚举"""
+    NORMAL = "0"  # 正常
+    DISABLE = "1"  # 停用
 
-# 性别
-class Gender:
-    """性别常量"""
-    # 男
-    MALE = "0"
-    # 女
-    FEMALE = "1"
-    # 未知
-    UNKNOWN = "2"
 
-# 是否（Y是 N否）
-class YesNo:
-    """是否常量"""
-    # 是
-    YES = "Y"
-    # 否
-    NO = "N"
+class DeleteFlagEnum(str, Enum):
+    """删除标志枚举"""
+    NORMAL = "0"  # 正常
+    DELETED = "1"  # 已删除
 
-# 状态（0正常 1停用）
-class Status:
-    """状态常量"""
-    # 正常
-    NORMAL = "0"
-    # 停用
-    DISABLE = "1" 
+
+class MenuTypeEnum(str, Enum):
+    """菜单类型枚举"""
+    DIRECTORY = "M"  # 目录
+    MENU = "C"  # 菜单
+    BUTTON = "F"  # 按钮
+
+
+class VisibleEnum(str, Enum):
+    """显示状态枚举"""
+    SHOW = "0"  # 显示
+    HIDE = "1"  # 隐藏
+
+
+class YesNoEnum(str, Enum):
+    """是/否枚举"""
+    YES = "Y"  # 是
+    NO = "N"  # 否
+
+
+class SexEnum(str, Enum):
+    """性别枚举"""
+    MALE = "0"  # 男
+    FEMALE = "1"  # 女
+    UNKNOWN = "2"  # 未知
+
+
+class UserTypeEnum(str, Enum):
+    """用户类型枚举"""
+    SYSTEM_USER = "00"  # 系统用户
+
+
+class DataScopeEnum(str, Enum):
+    """数据范围枚举"""
+    ALL = "1"  # 全部数据权限
+    CUSTOM = "2"  # 自定义数据权限
+    DEPT = "3"  # 本部门数据权限
+    DEPT_AND_CHILD = "4"  # 本部门及以下数据权限 

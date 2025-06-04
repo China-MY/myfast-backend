@@ -1,60 +1,56 @@
-from fastapi import FastAPI, Depends
+import uvicorn
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.middleware.sessions import SessionMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.api.v1.system import user, role, menu, dept, post, dict_type, config
-from app.api.v1.monitor import online, job, server, cache
-from app.api.v1.tool import gen, swagger, build
+from app.api.v1.api import api_router
 from app.core.config import settings
-from app.db.init_db import init_db
-from app.middleware.logging import LoggingMiddleware
-from app.middleware.exception import ExceptionMiddleware
 
+# 创建FastAPI应用
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    description=settings.PROJECT_DESCRIPTION,
-    version=settings.PROJECT_VERSION,
+    description="FastAPI企业级后台权限管理系统",
+    version="1.0.0",
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
-    docs_url=f"{settings.API_V1_STR}/docs",
-    redoc_url=f"{settings.API_V1_STR}/redoc",
+    docs_url="/docs",
+    redoc_url="/redoc",
 )
 
-# 添加中间件
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.BACKEND_CORS_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
-app.add_middleware(LoggingMiddleware)
-app.add_middleware(ExceptionMiddleware)
+# 配置CORS
+if settings.BACKEND_CORS_ORIGINS:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
-# 注册路由
-app.include_router(user.router, prefix=settings.API_V1_STR)
-app.include_router(role.router, prefix=settings.API_V1_STR)
-app.include_router(menu.router, prefix=settings.API_V1_STR)
-app.include_router(dept.router, prefix=settings.API_V1_STR)
-app.include_router(post.router, prefix=settings.API_V1_STR)
-app.include_router(dict_type.router, prefix=settings.API_V1_STR)
-app.include_router(config.router, prefix=settings.API_V1_STR)
-app.include_router(online.router, prefix=settings.API_V1_STR)
-app.include_router(job.router, prefix=settings.API_V1_STR)
-app.include_router(server.router, prefix=settings.API_V1_STR)
-app.include_router(cache.router, prefix=settings.API_V1_STR)
-app.include_router(gen.router, prefix=settings.API_V1_STR)
-app.include_router(swagger.router, prefix=settings.API_V1_STR)
-app.include_router(build.router, prefix=settings.API_V1_STR)
+# 挂载API路由
+app.include_router(api_router, prefix=settings.API_V1_STR)
 
-@app.on_event("startup")
-async def startup_event():
-    await init_db()
 
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to MyFast API"}
+@app.get("/", tags=["首页"])
+def root():
+    """
+    根路由，返回系统信息
+    """
+    return {
+        "message": f"欢迎使用{settings.PROJECT_NAME}后台管理系统API",
+        "docs": "/docs",
+        "redoc": "/redoc"
+    }
+
+
+# 健康检查接口
+@app.get("/health", tags=["系统"])
+def health_check():
+    """
+    健康检查接口
+    """
+    return {"status": "ok", "message": "系统运行正常"}
+
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)

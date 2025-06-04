@@ -1,471 +1,242 @@
-from typing import List, Optional, Dict, Any, Tuple
+from typing import Any, Dict, List, Optional, Union
+from datetime import datetime
 from sqlalchemy.orm import Session
-from sqlalchemy import func, and_, or_
 
-from app.domain.models.system.role import SysRole
-from app.domain.models.system.role_menu import SysRoleMenu
-from app.domain.models.system.role_dept import SysRoleDept
-from app.domain.models.system.user_role import SysUserRole
-from app.domain.schemas.system.role import RoleCreate, RoleUpdate, RoleInfo, RoleQuery
-from app.common.exception import NotFound
-
-from fastapi import HTTPException, status
-from app.crud.role import role as role_crud
-from app.models.role import Role
-from app.schemas.role import RoleMenuTree
-
-
-def get_role(db: Session, role_id: int) -> Optional[SysRole]:
-    """
-    根据角色ID获取角色信息
-    """
-    return db.query(SysRole).filter(
-        SysRole.role_id == role_id,
-        SysRole.del_flag == "0"
-    ).first()
-
-
-def get_role_by_key(db: Session, role_key: str) -> Optional[SysRole]:
-    """
-    根据角色权限字符串获取角色信息
-    """
-    return db.query(SysRole).filter(
-        SysRole.role_key == role_key,
-        SysRole.del_flag == "0"
-    ).first()
-
-
-def get_roles(
-    db: Session, 
-    params: RoleQuery
-) -> Tuple[List[SysRole], int]:
-    """
-    获取角色列表（分页查询）
-    """
-    query = db.query(SysRole).filter(SysRole.del_flag == "0")
-    
-    # 构建查询条件
-    if params.role_name:
-        query = query.filter(SysRole.role_name.like(f"%{params.role_name}%"))
-    if params.role_key:
-        query = query.filter(SysRole.role_key.like(f"%{params.role_key}%"))
-    if params.status:
-        query = query.filter(SysRole.status == params.status)
-    if params.begin_time and params.end_time:
-        query = query.filter(
-            SysRole.create_time.between(params.begin_time, params.end_time)
-        )
-    
-    # 统计总数
-    total = query.count()
-    
-    # 分页查询
-    roles = query.order_by(SysRole.role_sort.asc()).offset(
-        (params.page_num - 1) * params.page_size
-    ).limit(params.page_size).all()
-    
-    return roles, total
-
-
-def get_role_menu_ids(db: Session, role_id: int) -> List[int]:
-    """
-    获取角色关联的菜单ID列表
-    """
-    # 查询角色关联的菜单
-    role_menus = db.execute(
-        SysRoleMenu.select().where(
-            SysRoleMenu.c.role_id == role_id
-        )
-    ).fetchall()
-    
-    # 提取菜单ID
-    menu_ids = [rm.menu_id for rm in role_menus]
-    
-    return menu_ids
-
-
-def get_role_dept_ids(db: Session, role_id: int) -> List[int]:
-    """
-    获取角色关联的部门ID列表
-    """
-    # 查询角色关联的部门
-    role_depts = db.execute(
-        SysRoleDept.select().where(
-            SysRoleDept.c.role_id == role_id
-        )
-    ).fetchall()
-    
-    # 提取部门ID
-    dept_ids = [rd.dept_id for rd in role_depts]
-    
-    return dept_ids
-
-
-def create_role(
-    db: Session, 
-    role_data: RoleCreate
-) -> SysRole:
-    """
-    创建角色
-    """
-    # 检查角色权限字符串是否已存在
-    if get_role_by_key(db, role_data.role_key):
-        raise ValueError(f"角色权限字符串 {role_data.role_key} 已存在")
-    
-    # 创建角色对象
-    db_role = SysRole(
-        role_name=role_data.role_name,
-        role_key=role_data.role_key,
-        role_sort=role_data.role_sort,
-        data_scope=role_data.data_scope,
-        status=role_data.status,
-        remark=role_data.remark
-    )
-    
-    # 保存角色信息
-    db.add(db_role)
-    db.flush()
-    
-    # 分配菜单权限
-    if role_data.menu_ids:
-        for menu_id in role_data.menu_ids:
-            db.execute(
-                SysRoleMenu.insert().values(
-                    role_id=db_role.role_id,
-                    menu_id=menu_id
-                )
-            )
-    
-    # 分配数据权限
-    if role_data.dept_ids and role_data.data_scope == "2":  # 自定数据权限
-        for dept_id in role_data.dept_ids:
-            db.execute(
-                SysRoleDept.insert().values(
-                    role_id=db_role.role_id,
-                    dept_id=dept_id
-                )
-            )
-    
-    # 提交事务
-    db.commit()
-    db.refresh(db_role)
-    
-    return db_role
-
-
-def update_role(
-    db: Session, 
-    role_id: int, 
-    role_data: RoleUpdate
-) -> Optional[SysRole]:
-    """
-    更新角色信息
-    """
-    # 获取角色信息
-    db_role = get_role(db, role_id)
-    if not db_role:
-        raise NotFound(f"角色ID {role_id} 不存在")
-    
-    # 检查角色权限字符串是否已存在（如果修改了权限字符串）
-    if db_role.role_key != role_data.role_key and get_role_by_key(db, role_data.role_key):
-        raise ValueError(f"角色权限字符串 {role_data.role_key} 已存在")
-    
-    # 更新角色基本信息
-    for key, value in role_data.dict(exclude={"menu_ids", "dept_ids"}).items():
-        if value is not None:
-            setattr(db_role, key, value)
-    
-    # 更新菜单权限
-    if role_data.menu_ids is not None:
-        # 删除原有菜单关联
-        db.execute(
-            SysRoleMenu.delete().where(
-                SysRoleMenu.c.role_id == role_id
-            )
-        )
-        
-        # 添加新的菜单关联
-        for menu_id in role_data.menu_ids:
-            db.execute(
-                SysRoleMenu.insert().values(
-                    role_id=role_id,
-                    menu_id=menu_id
-                )
-            )
-    
-    # 更新数据权限
-    if role_data.dept_ids is not None and role_data.data_scope == "2":  # 自定数据权限
-        # 删除原有部门关联
-        db.execute(
-            SysRoleDept.delete().where(
-                SysRoleDept.c.role_id == role_id
-            )
-        )
-        
-        # 添加新的部门关联
-        for dept_id in role_data.dept_ids:
-            db.execute(
-                SysRoleDept.insert().values(
-                    role_id=role_id,
-                    dept_id=dept_id
-                )
-            )
-    
-    # 提交事务
-    db.commit()
-    db.refresh(db_role)
-    
-    return db_role
-
-
-def delete_role(db: Session, role_id: int) -> bool:
-    """
-    删除角色（逻辑删除）
-    """
-    # 获取角色信息
-    db_role = get_role(db, role_id)
-    if not db_role:
-        raise NotFound(f"角色ID {role_id} 不存在")
-    
-    # 检查角色是否已分配
-    user_count = db.execute(
-        SysUserRole.select().where(
-            SysUserRole.c.role_id == role_id
-        )
-    ).rowcount
-    
-    if user_count > 0:
-        raise ValueError(f"角色已分配，不能删除")
-    
-    # 逻辑删除
-    db_role.del_flag = "1"
-    db.commit()
-    
-    return True
-
-
-def update_role_status(
-    db: Session, 
-    role_id: int, 
-    status: str
-) -> Optional[SysRole]:
-    """
-    更新角色状态
-    """
-    # 获取角色信息
-    db_role = get_role(db, role_id)
-    if not db_role:
-        raise NotFound(f"角色ID {role_id} 不存在")
-    
-    # 更新状态
-    db_role.status = status
-    db.commit()
-    db.refresh(db_role)
-    
-    return db_role
-
-
-def get_all_roles(db: Session) -> List[SysRole]:
-    """
-    获取所有角色列表（不分页）
-    """
-    return db.query(SysRole).filter(
-        SysRole.del_flag == "0"
-    ).order_by(SysRole.role_sort.asc()).all()
-
+from app.entity.sys_role import SysRole
+from app.entity.sys_menu import SysMenu
+from app.entity.sys_dept import SysDept
+from app.schema.role import RoleCreate, RoleUpdate
+from app.common.exception import BusinessException
+from app.common.constants import StatusEnum, DeleteFlagEnum
 
 class RoleService:
+    """角色服务类"""
+    
     @staticmethod
-    def get_role_by_id(db: Session, role_id: int) -> Optional[Role]:
-        """获取角色信息"""
-        role = role_crud.get(db, id=role_id)
-        if not role:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="角色不存在"
-            )
-        return role
-
+    def get_role_by_id(db: Session, role_id: int) -> Optional[SysRole]:
+        """根据角色ID获取角色信息"""
+        return db.query(SysRole).filter(
+            SysRole.role_id == role_id,
+            SysRole.del_flag == DeleteFlagEnum.NORMAL
+        ).first()
+    
     @staticmethod
-    def get_role_list(
+    def get_role_by_key(db: Session, role_key: str) -> Optional[SysRole]:
+        """根据角色权限字符获取角色信息"""
+        return db.query(SysRole).filter(
+            SysRole.role_key == role_key,
+            SysRole.del_flag == DeleteFlagEnum.NORMAL
+        ).first()
+    
+    @staticmethod
+    def get_roles(
         db: Session, 
-        page: int = 1, 
-        page_size: int = 10, 
+        page_num: int = 1, 
+        page_size: int = 10,
         role_name: Optional[str] = None,
         role_key: Optional[str] = None,
-        status: Optional[str] = None
+        status: Optional[str] = None,
+        begin_time: Optional[datetime] = None,
+        end_time: Optional[datetime] = None
     ) -> Dict[str, Any]:
         """获取角色列表"""
-        skip = (page - 1) * page_size
+        query = db.query(SysRole).filter(SysRole.del_flag == DeleteFlagEnum.NORMAL)
         
-        # 获取角色列表
-        result = role_crud.get_role_list(
-            db, 
-            skip=skip, 
-            limit=page_size, 
-            role_name=role_name,
-            role_key=role_key,
-            status=status
-        )
+        # 应用过滤条件
+        if role_name:
+            query = query.filter(SysRole.role_name.like(f"%{role_name}%"))
+        if role_key:
+            query = query.filter(SysRole.role_key.like(f"%{role_key}%"))
+        if status:
+            query = query.filter(SysRole.status == status)
+        if begin_time and end_time:
+            query = query.filter(SysRole.create_time.between(begin_time, end_time))
         
-        return result
-
+        # 计算总数
+        total = query.count()
+        
+        # 分页
+        items = query.order_by(SysRole.role_sort).offset((page_num - 1) * page_size).limit(page_size).all()
+        
+        return {
+            "total": total,
+            "items": items,
+            "page_num": page_num,
+            "page_size": page_size
+        }
+    
     @staticmethod
-    def create_role(db: Session, role_in: RoleCreate) -> Role:
+    def create_role(db: Session, role_in: RoleCreate, current_user_name: str) -> SysRole:
         """创建角色"""
         # 检查角色名称是否已存在
-        if role_crud.get_by_role_name(db, role_name=role_in.role_name):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"角色名称 '{role_in.role_name}' 已存在"
-            )
+        exist_role = db.query(SysRole).filter(
+            SysRole.role_name == role_in.role_name,
+            SysRole.del_flag == DeleteFlagEnum.NORMAL
+        ).first()
+        if exist_role:
+            raise BusinessException(code=400, msg=f"角色名称 {role_in.role_name} 已存在")
         
-        # 检查角色权限标识是否已存在
-        if role_crud.get_by_role_key(db, role_key=role_in.role_key):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"角色权限标识 '{role_in.role_key}' 已存在"
-            )
-            
-        # 创建角色
-        return role_crud.create_with_menus(db, obj_in=role_in)
-
-    @staticmethod
-    def update_role(db: Session, role_id: int, role_in: RoleUpdate) -> Role:
-        """更新角色"""
-        db_role = role_crud.get(db, id=role_id)
-        if not db_role:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="角色不存在"
-            )
-            
-        # 不允许更新admin角色
-        if db_role.role_key == "admin":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="不能修改超级管理员角色"
-            )
-            
-        # 检查角色名称唯一性
-        if role_in.role_name and role_in.role_name != db_role.role_name:
-            if role_crud.get_by_role_name(db, role_name=role_in.role_name):
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"角色名称 '{role_in.role_name}' 已存在"
-                )
-                
-        # 检查角色权限标识唯一性
-        if role_in.role_key and role_in.role_key != db_role.role_key:
-            if role_crud.get_by_role_key(db, role_key=role_in.role_key):
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"角色权限标识 '{role_in.role_key}' 已存在"
-                )
-                
-        # 更新角色
-        return role_crud.update_with_menus(db, db_obj=db_role, obj_in=role_in)
-
-    @staticmethod
-    def delete_role(db: Session, role_id: int) -> Role:
-        """删除角色"""
-        db_role = role_crud.get(db, id=role_id)
-        if not db_role:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="角色不存在"
-            )
-            
-        # 不允许删除admin角色
-        if db_role.role_key == "admin":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="不能删除超级管理员角色"
-            )
-            
-        # 逻辑删除角色
-        db_role.del_flag = "1"
+        # 检查角色权限字符是否已存在
+        exist_role = db.query(SysRole).filter(
+            SysRole.role_key == role_in.role_key,
+            SysRole.del_flag == DeleteFlagEnum.NORMAL
+        ).first()
+        if exist_role:
+            raise BusinessException(code=400, msg=f"角色权限字符 {role_in.role_key} 已存在")
+        
+        # 创建角色对象
+        role_data = role_in.dict(exclude={"menu_ids", "dept_ids"})
+        role_data["create_by"] = current_user_name
+        role_data["create_time"] = datetime.now()
+        
+        db_role = SysRole(**role_data)
+        
+        # 处理菜单关系
+        if role_in.menu_ids:
+            menus = db.query(SysMenu).filter(
+                SysMenu.menu_id.in_(role_in.menu_ids),
+                SysMenu.status == StatusEnum.NORMAL
+            ).all()
+            db_role.menus = menus
+        
+        # 处理部门关系
+        if role_in.dept_ids:
+            depts = db.query(SysDept).filter(
+                SysDept.dept_id.in_(role_in.dept_ids),
+                SysDept.status == StatusEnum.NORMAL,
+                SysDept.del_flag == DeleteFlagEnum.NORMAL
+            ).all()
+            db_role.depts = depts
+        
+        # 保存角色
+        db.add(db_role)
         db.commit()
         db.refresh(db_role)
         return db_role
-
+    
     @staticmethod
-    def batch_delete_roles(db: Session, role_ids: List[int]) -> List[Role]:
-        """批量删除角色"""
-        # 检查是否包含admin角色
-        for role_id in role_ids:
-            db_role = role_crud.get(db, id=role_id)
-            if db_role and db_role.role_key == "admin":
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="不能删除超级管理员角色"
-                )
-                
-        # 批量逻辑删除角色
-        deleted_roles = []
-        for role_id in role_ids:
-            db_role = role_crud.get(db, id=role_id)
-            if db_role:
-                db_role.del_flag = "1"
-                db.add(db_role)
-                deleted_roles.append(db_role)
-                
+    def update_role(
+        db: Session, 
+        role: SysRole,
+        role_in: Union[RoleUpdate, Dict[str, Any]],
+        current_user_name: str
+    ) -> SysRole:
+        """更新角色"""
+        role_data = role_in.dict(exclude={"menu_ids", "dept_ids"}) if isinstance(role_in, RoleUpdate) else role_in
+        role_data["update_by"] = current_user_name
+        role_data["update_time"] = datetime.now()
+        
+        # 检查角色名称是否已存在
+        if "role_name" in role_data and role_data["role_name"] != role.role_name:
+            exist_role = db.query(SysRole).filter(
+                SysRole.role_name == role_data["role_name"],
+                SysRole.del_flag == DeleteFlagEnum.NORMAL,
+                SysRole.role_id != role.role_id
+            ).first()
+            if exist_role:
+                raise BusinessException(code=400, msg=f"角色名称 {role_data['role_name']} 已存在")
+        
+        # 检查角色权限字符是否已存在
+        if "role_key" in role_data and role_data["role_key"] != role.role_key:
+            exist_role = db.query(SysRole).filter(
+                SysRole.role_key == role_data["role_key"],
+                SysRole.del_flag == DeleteFlagEnum.NORMAL,
+                SysRole.role_id != role.role_id
+            ).first()
+            if exist_role:
+                raise BusinessException(code=400, msg=f"角色权限字符 {role_data['role_key']} 已存在")
+        
+        # 更新基本信息
+        for key, value in role_data.items():
+            if hasattr(role, key) and value is not None:
+                setattr(role, key, value)
+        
+        # 处理菜单关系
+        if isinstance(role_in, RoleUpdate) and role_in.menu_ids is not None:
+            menus = db.query(SysMenu).filter(
+                SysMenu.menu_id.in_(role_in.menu_ids),
+                SysMenu.status == StatusEnum.NORMAL
+            ).all()
+            role.menus = menus
+        
+        # 处理部门关系
+        if isinstance(role_in, RoleUpdate) and role_in.dept_ids is not None:
+            depts = db.query(SysDept).filter(
+                SysDept.dept_id.in_(role_in.dept_ids),
+                SysDept.status == StatusEnum.NORMAL,
+                SysDept.del_flag == DeleteFlagEnum.NORMAL
+            ).all()
+            role.depts = depts
+        
+        # 保存角色
+        db.add(role)
         db.commit()
-        return deleted_roles
-
+        db.refresh(role)
+        return role
+    
     @staticmethod
-    def update_role_status(db: Session, role_id: int, status: str) -> Role:
+    def delete_role(db: Session, role_id: int, current_user_name: str) -> bool:
+        """删除角色（逻辑删除）"""
+        role = RoleService.get_role_by_id(db, role_id)
+        if not role:
+            return False
+        
+        # 不允许删除管理员角色
+        if role.role_key == "admin":
+            raise BusinessException(code=400, msg="不允许删除管理员角色")
+        
+        # 检查角色是否已分配用户
+        if role.users and len(role.users) > 0:
+            raise BusinessException(code=400, msg="该角色已分配用户，不能删除")
+        
+        # 逻辑删除
+        role.del_flag = DeleteFlagEnum.DELETED
+        role.update_by = current_user_name
+        role.update_time = datetime.now()
+        
+        db.add(role)
+        db.commit()
+        return True
+    
+    @staticmethod
+    def update_role_status(
+        db: Session, 
+        role_id: int, 
+        status: str,
+        current_user_name: str
+    ) -> bool:
         """更新角色状态"""
-        db_role = role_crud.get(db, id=role_id)
-        if not db_role:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="角色不存在"
-            )
-            
-        # 不允许禁用admin角色
-        if db_role.role_key == "admin" and status != "0":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="不能禁用超级管理员角色"
-            )
-            
-        # 更新角色状态
-        return role_crud.update_role_status(db, role_id=role_id, status=status)
-
-    @staticmethod
-    def get_role_menu_tree(db: Session, role_id: int) -> RoleMenuTree:
-        """获取角色菜单权限树"""
-        db_role = role_crud.get(db, id=role_id)
-        if not db_role:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="角色不存在"
-            )
-            
-        # 获取角色菜单ID列表
-        menu_ids = role_crud.get_role_menu_ids(db, role_id)
+        role = RoleService.get_role_by_id(db, role_id)
+        if not role:
+            return False
         
-        # 如果是自定义数据权限，获取角色部门ID列表
-        dept_ids = None
-        if db_role.data_scope == "2":  # 自定义数据权限
-            dept_ids = role_crud.get_role_dept_ids(db, role_id)
-            
-        # 构建角色菜单树
-        role_menu_tree = RoleMenuTree(
-            role_id=db_role.role_id,
-            role_name=db_role.role_name,
-            role_key=db_role.role_key,
-            data_scope=db_role.data_scope,
-            menu_ids=menu_ids,
-            dept_ids=dept_ids
-        )
+        # 不允许禁用管理员角色
+        if status == StatusEnum.DISABLE and role.role_key == "admin":
+            raise BusinessException(code=400, msg="不允许禁用管理员角色")
         
-        return role_menu_tree
-
+        # 更新状态
+        role.status = status
+        role.update_by = current_user_name
+        role.update_time = datetime.now()
+        
+        db.add(role)
+        db.commit()
+        return True
+    
     @staticmethod
-    def get_all_roles(db: Session, status: Optional[str] = None) -> List[Role]:
-        """获取所有角色列表"""
-        return role_crud.get_all_roles(db, status=status)
-
-
-role_service = RoleService() 
+    def get_role_menu_ids(db: Session, role_id: int) -> List[int]:
+        """获取角色菜单ID列表"""
+        role = RoleService.get_role_by_id(db, role_id)
+        if not role:
+            return []
+        
+        return [menu.menu_id for menu in role.menus]
+    
+    @staticmethod
+    def get_role_dept_ids(db: Session, role_id: int) -> List[int]:
+        """获取角色部门ID列表"""
+        role = RoleService.get_role_by_id(db, role_id)
+        if not role:
+            return []
+        
+        return [dept.dept_id for dept in role.depts] 

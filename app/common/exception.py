@@ -1,46 +1,54 @@
-from fastapi import HTTPException, status
+from fastapi import HTTPException, Request, status
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 
+from app.common.response import ResponseModel
 
-class APIException(HTTPException):
-    """API异常基类"""
+class BusinessException(HTTPException):
+    """业务异常"""
     def __init__(
         self,
-        detail: str = "未知错误",
-        status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
-        headers: dict = None,
-    ):
-        super().__init__(status_code=status_code, detail=detail, headers=headers)
+        code: int,
+        msg: str = "业务处理异常",
+    ) -> None:
+        self.code = code
+        self.msg = msg
+        super().__init__(status_code=200, detail=msg)
 
 
-class NotFound(APIException):
-    """资源未找到异常"""
-    def __init__(self, detail: str = "资源未找到"):
-        super().__init__(detail=detail, status_code=status.HTTP_404_NOT_FOUND)
+async def business_exception_handler(request: Request, exc: BusinessException) -> JSONResponse:
+    """业务异常处理器"""
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=ResponseModel.error(code=exc.code, msg=exc.msg),
+    )
 
 
-class BadRequest(APIException):
-    """请求参数错误异常"""
-    def __init__(self, detail: str = "请求参数错误"):
-        super().__init__(detail=detail, status_code=status.HTTP_400_BAD_REQUEST)
+async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
+    """请求参数验证异常处理器"""
+    error_messages = []
+    for error in exc.errors():
+        loc = " -> ".join([str(x) for x in error["loc"]])
+        error_messages.append(f"{loc}: {error['msg']}")
+    
+    error_message = "；".join(error_messages)
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=ResponseModel.error(code=400, msg=f"参数校验失败: {error_message}"),
+    )
 
 
-class Unauthorized(APIException):
-    """未授权异常"""
-    def __init__(self, detail: str = "未授权"):
-        super().__init__(
-            detail=detail,
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+    """HTTP异常处理器"""
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=ResponseModel.error(code=exc.status_code, msg=exc.detail),
+    )
 
 
-class Forbidden(APIException):
-    """权限不足异常"""
-    def __init__(self, detail: str = "权限不足"):
-        super().__init__(detail=detail, status_code=status.HTTP_403_FORBIDDEN)
-
-
-class ServerError(APIException):
-    """服务器内部错误异常"""
-    def __init__(self, detail: str = "服务器内部错误"):
-        super().__init__(detail=detail, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR) 
+async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    """全局异常处理器"""
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=ResponseModel.error(code=500, msg=f"系统异常: {str(exc)}"),
+    ) 

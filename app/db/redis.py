@@ -1,18 +1,27 @@
 import redis
-from app.config import settings
+from app.core.config import settings
 
-# 创建Redis连接池
-redis_pool = redis.ConnectionPool(
+# Redis客户端连接池
+redis_client = redis.Redis(
     host=settings.REDIS_HOST,
     port=settings.REDIS_PORT,
     db=settings.REDIS_DB,
-    password=settings.REDIS_PASSWORD,
-    decode_responses=True,
+    password=settings.REDIS_PASSWORD or None,
+    decode_responses=True  # 自动解码响应
 )
 
-# 创建Redis客户端
-redis_client = redis.Redis(connection_pool=redis_pool)
-
-# 获取Redis客户端
 def get_redis():
-    return redis_client 
+    """获取Redis客户端实例"""
+    try:
+        # 测试连接是否有效
+        redis_client.ping()
+        return redis_client
+    except redis.ConnectionError:
+        # 连接失败则重新连接
+        return redis.Redis(
+            host=settings.REDIS_HOST,
+            port=settings.REDIS_PORT,
+            db=settings.REDIS_DB,
+            password=settings.REDIS_PASSWORD or None,
+            decode_responses=True
+        ) 

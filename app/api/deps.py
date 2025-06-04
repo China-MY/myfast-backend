@@ -6,61 +6,92 @@ from jose import jwt
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
-from app.db.session import get_db
+from app.db.session import SessionLocal
 from app.core.config import settings
-from app.core.security import oauth2_scheme, get_current_user as security_get_current_user
-from app.models.user import User
+from app.models.user import SysUser
+from app.crud.user import user
 from app.schemas.token import TokenPayload
 
 
-async def get_db() -> Generator:
+# 创建OAuth2PasswordBearer依赖项
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login")
+
+
+def get_db() -> Generator:
     """
-    获取数据库会话依赖项
+    获取数据库会话
     """
-    db = next(get_db())
+    db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
 
 
-async def get_current_user(
-    db: Session = Depends(get_db),
-    token: str = Depends(oauth2_scheme)
-) -> User:
+def get_current_user(
+    db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
+) -> SysUser:
     """
-    获取当前用户依赖项
+    获取当前用户
     """
-    return await security_get_current_user(db=db, token=token)
+    try:
+        # 解析JWT令牌
+        payload = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+        )
+        token_data = TokenPayload(**payload)
+    except (jwt.JWTError, ValidationError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="无法验证凭据",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    # 根据令牌中的用户ID获取用户
+    user_id = int(token_data.sub)
+    user_obj = db.query(SysUser).filter(SysUser.user_id == user_id).first()
+    if not user_obj:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="用户不存在"
+        )
+    
+    return user_obj
 
 
-async def get_current_active_user(
-    current_user: User = Depends(get_current_user),
-) -> User:
+def get_current_active_user(
+    current_user: SysUser = Depends(get_current_user),
+) -> SysUser:
     """
-    获取当前活跃用户依赖项
+    获取当前活跃用户
     """
     if current_user.status != "0":
-        raise HTTPException(status_code=400, detail="用户已被禁用")
+        raise HTTPException(status_code=400, detail="用户未激活")
     return current_user
 
 
-async def get_current_admin_user(
-    current_user: User = Depends(get_current_user),
-) -> User:
+def check_permissions(required_permissions: list):
     """
-    获取当前管理员用户依赖项
+    检查用户是否拥有指定的权限
     """
-    # 通过角色表判断用户是否为管理员
-    admin_role = False
-    for role in current_user.roles:
-        if role.role_key == "admin":
-            admin_role = True
-            break
+    def permission_dependency(
+        db: Session = Depends(get_db), 
+        current_user: SysUser = Depends(get_current_active_user)
+    ) -> bool:
+        # 获取用户权限
+        user_permissions = user.get_user_permissions(current_user)
+        
+        # 超级管理员拥有所有权限
+        if "*:*:*" in user_permissions:
+            return True
+        
+        # 检查是否拥有所需权限
+        for permission in required_permissions:
+            if permission not in user_permissions:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="没有足够的权限执行此操作",
+                )
+        
+        return True
     
-    if not admin_role:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="权限不足",
-        )
-    return current_user 
+    return permission_dependency 

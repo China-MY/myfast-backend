@@ -1,153 +1,99 @@
 from typing import Any, Dict, Optional, Union, List
 
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 
-from app.core.security import get_password_hash, verify_password
 from app.crud.base import CRUDBase
-from app.models.user import User
-from app.models.role import Role, user_role
-from app.models.post import Post, user_post
-from app.models.dept import Dept
+from app.models.user import SysUser
+from app.models.role import SysRole
 from app.schemas.user import UserCreate, UserUpdate
+from app.utils.password import get_password_hash, verify_password
 
 
-class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
-    def get_by_username(self, db: Session, *, username: str) -> Optional[User]:
+class CRUDUser(CRUDBase[SysUser, UserCreate, UserUpdate]):
+    """用户CRUD操作类"""
+    
+    def get_by_username(self, db: Session, *, username: str) -> Optional[SysUser]:
         """
-        通过用户名获取用户
+        根据用户名获取用户
+        :param db: 数据库会话
+        :param username: 用户名
+        :return: 用户对象
         """
-        return db.query(User).filter(User.username == username).first()
-
-    def get_by_email(self, db: Session, *, email: str) -> Optional[User]:
+        return db.query(SysUser).filter(SysUser.username == username).first()
+    
+    def create(self, db: Session, *, obj_in: UserCreate) -> SysUser:
         """
-        通过邮箱获取用户
+        创建新用户
+        :param db: 数据库会话
+        :param obj_in: 用户创建数据
+        :return: 创建的用户
         """
-        return db.query(User).filter(User.email == email).first()
-
-    def get_multi_with_info(
-        self, db: Session, *, skip: int = 0, limit: int = 100, **filters
-    ) -> Dict[str, Any]:
-        """
-        获取用户列表(带部门信息)
-        """
-        query = db.query(User, Dept.dept_name).outerjoin(
-            Dept, User.dept_id == Dept.dept_id
-        )
-        
-        # 应用过滤条件
-        for field, value in filters.items():
-            if value is not None:
-                if field == "dept_id" and value > 0:
-                    query = query.filter(User.dept_id == value)
-                elif field in ["username", "nickname", "phonenumber", "status"]:
-                    if isinstance(value, str) and field != "status":
-                        query = query.filter(getattr(User, field).like(f"%{value}%"))
-                    else:
-                        query = query.filter(getattr(User, field) == value)
-
-        total = query.count()
-        items = query.offset(skip).limit(limit).all()
-        
-        # 处理结果集
-        result_list = []
-        for user, dept_name in items:
-            user_dict = {
-                "user_id": user.user_id,
-                "dept_id": user.dept_id,
-                "dept_name": dept_name,
-                "username": user.username,
-                "nickname": user.nickname,
-                "email": user.email,
-                "phonenumber": user.phonenumber,
-                "sex": user.sex,
-                "avatar": user.avatar,
-                "status": user.status,
-                "login_ip": user.login_ip,
-                "login_date": user.login_date,
-                "create_time": user.create_time,
-                "remark": user.remark
-            }
-            result_list.append(user_dict)
-        
-        return {"total": total, "items": result_list}
-
-    def create_with_roles_and_posts(
-        self, db: Session, *, obj_in: UserCreate
-    ) -> User:
-        """
-        创建用户(同时设置角色和岗位)
-        """
-        # 创建用户基础信息
-        db_obj = User(
+        db_obj = SysUser(
             username=obj_in.username,
             nickname=obj_in.nickname,
             email=obj_in.email,
             phonenumber=obj_in.phonenumber,
             sex=obj_in.sex,
-            dept_id=obj_in.dept_id,
             status=obj_in.status,
-            remark=obj_in.remark,
-            password=get_password_hash(obj_in.password),
+            dept_id=obj_in.dept_id,
+            password=get_password_hash(obj_in.password)
         )
         db.add(db_obj)
-        db.flush()
-        
-        # 设置用户角色关系
-        if obj_in.role_ids:
-            self.update_user_roles(db, db_obj, obj_in.role_ids)
-            
-        # 设置用户岗位关系
-        if obj_in.post_ids:
-            self.update_user_posts(db, db_obj, obj_in.post_ids)
-        
         db.commit()
         db.refresh(db_obj)
+        
+        # 添加角色关联
+        if obj_in.role_ids:
+            roles = db.query(SysRole).filter(SysRole.role_id.in_(obj_in.role_ids)).all()
+            db_obj.roles = roles
+            db.commit()
+            
         return db_obj
-
-    def update_with_roles_and_posts(
-        self,
-        db: Session,
-        *,
-        db_obj: User,
-        obj_in: Union[UserUpdate, Dict[str, Any]]
-    ) -> User:
+    
+    def update(
+        self, db: Session, *, db_obj: SysUser, obj_in: Union[UserUpdate, Dict[str, Any]]
+    ) -> SysUser:
         """
-        更新用户(同时更新角色和岗位)
+        更新用户
+        :param db: 数据库会话
+        :param db_obj: 数据库中的用户对象
+        :param obj_in: 更新数据
+        :return: 更新后的用户
         """
         if isinstance(obj_in, dict):
             update_data = obj_in
         else:
-            update_data = obj_in.dict(exclude_unset=True)
+            update_data = obj_in.model_dump(exclude_unset=True)
         
-        # 如果更新密码
+        # 如果更新密码，则哈希处理
         if "password" in update_data and update_data["password"]:
             hashed_password = get_password_hash(update_data["password"])
             update_data["password"] = hashed_password
-        # 如果不更新密码,从更新数据中删除password字段
-        elif "password" in update_data:
-            del update_data["password"]
-            
-        # 处理角色和岗位
-        role_ids = update_data.pop("role_ids", None)
-        post_ids = update_data.pop("post_ids", None)
         
-        # 调用基类的update方法更新基本信息
-        user = super().update(db, db_obj=db_obj, obj_in=update_data)
+        # 角色处理
+        role_ids = None
+        if "role_ids" in update_data:
+            role_ids = update_data.pop("role_ids", None)
         
-        # 更新用户角色关系
-        if role_ids is not None:
-            self.update_user_roles(db, user, role_ids)
-            
-        # 更新用户岗位关系
-        if post_ids is not None:
-            self.update_user_posts(db, user, post_ids)
+        # 调用父类方法完成更新
+        result = super().update(db, db_obj=db_obj, obj_in=update_data)
         
-        return user
-
-    def authenticate(self, db: Session, *, username: str, password: str) -> Optional[User]:
+        # 更新角色关系
+        if role_ids:
+            roles = db.query(SysRole).filter(SysRole.role_id.in_(role_ids)).all()
+            result.roles = roles
+            db.commit()
+            db.refresh(result)
+        
+        return result
+    
+    def authenticate(self, db: Session, *, username: str, password: str) -> Optional[SysUser]:
         """
         验证用户
+        :param db: 数据库会话
+        :param username: 用户名
+        :param password: 密码
+        :return: 验证通过返回用户，否则返回None
         """
         user = self.get_by_username(db, username=username)
         if not user:
@@ -155,54 +101,42 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         if not verify_password(password, user.password):
             return None
         return user
-
-    def update_user_roles(self, db: Session, user: User, role_ids: List[int]) -> None:
-        """
-        更新用户角色关系
-        """
-        # 先删除用户的所有角色关系
-        db.execute(user_role.delete().where(user_role.c.user_id == user.user_id))
-        
-        # 添加新的角色关系
-        for role_id in role_ids:
-            db.execute(
-                user_role.insert().values(user_id=user.user_id, role_id=role_id)
-            )
-
-    def update_user_posts(self, db: Session, user: User, post_ids: List[int]) -> None:
-        """
-        更新用户岗位关系
-        """
-        # 先删除用户的所有岗位关系
-        db.execute(user_post.delete().where(user_post.c.user_id == user.user_id))
-        
-        # 添加新的岗位关系
-        for post_id in post_ids:
-            db.execute(
-                user_post.insert().values(user_id=user.user_id, post_id=post_id)
-            )
     
-    def get_user_roles(self, db: Session, user_id: int) -> List[Role]:
+    def is_active(self, user: SysUser) -> bool:
         """
-        获取用户的角色列表
+        判断用户是否处于活动状态
+        :param user: 用户对象
+        :return: 是否处于活动状态
         """
-        return db.query(Role).join(
-            user_role, user_role.c.role_id == Role.role_id
-        ).filter(
-            user_role.c.user_id == user_id,
-            Role.del_flag == "0"
-        ).all()
+        return user.status == "0"
     
-    def get_user_posts(self, db: Session, user_id: int) -> List[Post]:
+    def is_deleted(self, user: SysUser) -> bool:
         """
-        获取用户的岗位列表
+        判断用户是否已被删除
+        :param user: 用户对象
+        :return: 是否已被删除
         """
-        return db.query(Post).join(
-            user_post, user_post.c.post_id == Post.post_id
-        ).filter(
-            user_post.c.user_id == user_id,
-            Post.status == "0"
-        ).all()
+        return user.del_flag != "0"
+    
+    def get_user_permissions(self, user: SysUser) -> List[str]:
+        """
+        获取用户权限集合
+        :param user: 用户对象
+        :return: 权限列表
+        """
+        perms = set()
+        # 管理员拥有所有权限
+        admin_role = any(role.role_key == "admin" for role in user.roles)
+        if admin_role:
+            perms.add("*:*:*")
+        else:
+            for role in user.roles:
+                if role.status == "0":  # 角色启用状态
+                    for menu in role.menus:
+                        if menu.status == "0" and menu.perms:  # 菜单启用且有权限标识
+                            perms.add(menu.perms)
+        
+        return list(perms)
 
 
-user = CRUDUser(User) 
+user = CRUDUser(SysUser) 

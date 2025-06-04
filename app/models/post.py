@@ -1,35 +1,25 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Table
-from sqlalchemy.orm import relationship
 from datetime import datetime
+from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy.orm import relationship
 
 from app.db.session import Base
+from app.models.relation import SysUserPost
 
 
-# 用户与岗位关联表
-user_post = Table(
-    "sys_user_post",
-    Base.metadata,
-    Column("user_id", Integer, ForeignKey("sys_user.user_id"), primary_key=True),
-    Column("post_id", Integer, ForeignKey("sys_post.post_id"), primary_key=True)
-)
-
-
-class Post(Base):
+class SysPost(Base):
+    """岗位表"""
     __tablename__ = "sys_post"
 
-    post_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    post_code = Column(String(64), nullable=False)
-    post_name = Column(String(50), nullable=False)
-    post_sort = Column(Integer, nullable=False)
-    status = Column(String(1), nullable=False)
-    create_by = Column(String(64), default="")
-    create_time = Column(DateTime, default=datetime.now)
-    update_by = Column(String(64), default="")
-    update_time = Column(DateTime, nullable=True, onupdate=datetime.now)
-    remark = Column(String(500), nullable=True)
+    post_id = Column(Integer, primary_key=True, autoincrement=True, comment="岗位ID")
+    post_code = Column(String(64), nullable=False, comment="岗位编码")
+    post_name = Column(String(50), nullable=False, comment="岗位名称")
+    post_sort = Column(Integer, nullable=False, comment="显示顺序")
+    status = Column(String(1), nullable=False, comment="状态（0正常 1停用）")
+    create_by = Column(String(64), default="", comment="创建者")
+    create_time = Column(DateTime, default=datetime.now, comment="创建时间")
+    update_by = Column(String(64), default="", comment="更新者")
+    update_time = Column(DateTime, nullable=True, onupdate=datetime.now, comment="更新时间")
+    remark = Column(String(500), nullable=True, comment="备注")
 
-    # 关系定义
-    users = relationship("User", secondary=user_post, back_populates="posts")
-
-    def __repr__(self):
-        return f"<Post {self.post_name}>" 
+    # 关系
+    users = relationship("SysUser", secondary=SysUserPost, back_populates="posts") 

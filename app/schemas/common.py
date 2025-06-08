@@ -1,12 +1,11 @@
 from typing import Any, Generic, Optional, TypeVar, Dict, List
 
 from pydantic import BaseModel, ConfigDict, Field
-from pydantic.generics import GenericModel
 
 DataT = TypeVar("DataT")
 
 
-class ResponseModel(GenericModel, Generic[DataT]):
+class ResponseModel(BaseModel, Generic[DataT]):
     """通用响应模型"""
     code: int = Field(default=200, description="响应状态码：200成功，其他为失败")
     msg: str = Field(default="操作成功", description="响应消息")
@@ -40,7 +39,7 @@ class PageInfo(BaseModel):
     )
 
 
-class PageResponseModel(GenericModel, Generic[DataT]):
+class PageResponseModel(BaseModel, Generic[DataT]):
     """分页响应模型"""
     code: int = Field(default=200, description="响应状态码：200成功，其他为失败")
     msg: str = Field(default="操作成功", description="响应消息")

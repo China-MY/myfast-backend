@@ -20,8 +20,7 @@ class UserBase(BaseModel):
     status: str
     dept_id: Optional[int] = None
     
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 # 创建用户的请求模型
 class UserCreate(BaseModel):
@@ -70,8 +69,7 @@ class UserInfo(UserBase):
     roles: List[RoleBase] = []
     create_time: Optional[datetime] = None
     
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 # 用户分页查询请求模型
 class UserQuery(BaseModel):

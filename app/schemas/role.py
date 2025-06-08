@@ -38,4 +38,20 @@ class Role(RoleInDB):
     """返回角色模型"""
     menus: Optional[List[dict]] = []
     
+    model_config = ConfigDict(from_attributes=True)
+
+
+class RoleOut(RoleInDB):
+    """角色输出模型"""
+    create_by: Optional[str] = None
+    update_by: Optional[str] = None
+    remark: Optional[str] = None
+    
+    model_config = ConfigDict(from_attributes=True)
+
+
+class RoleWithMenu(RoleOut):
+    """角色带菜单输出模型"""
+    menu_ids: List[int] = []
+    
     model_config = ConfigDict(from_attributes=True) 

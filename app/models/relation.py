@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, ForeignKey, Table
+from sqlalchemy.ext.declarative import declarative_base
 from app.db.session import Base
 
 # 用户和角色关联表

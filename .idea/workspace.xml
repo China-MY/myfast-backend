@@ -5,15 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a0c2172a-e9ef-42da-a8de-d9ba53ff549d" name="更改" comment="20250604-登录注册功能已完成">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/myfast-backend.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/myfast-backend.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/v1/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/api.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/core/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/core/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/models/relation.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/relation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/schema/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schema/user.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/schemas/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/common.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/schemas/role.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/role.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/crud/menu.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/crud/menu.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/crud/role.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/crud/role.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/server.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,6 +31,7 @@
 }</component>
   <component name="ProjectId" id="2xrWr4FbaBOEWXV2f58prmCPDOB" />
   <component name="ProjectLevelVcsManager">
+    <OptionsSetting value="false" id="Update" />
     <ConfirmationsSetting value="2" id="Add" />
   </component>
   <component name="ProjectViewState">

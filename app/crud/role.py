@@ -114,7 +114,9 @@ class CRUDRole(CRUDBase[SysRole, RoleCreate, RoleUpdate]):
         """
         检查角色是否有关联用户
         """
-        return db.query(SysUserRole).filter(SysUserRole.role_id == role_id).count() > 0
+        # 使用Table对象正确的查询方式
+        result = db.execute(SysUserRole.select().where(SysUserRole.c.role_id == role_id))
+        return result.rowcount > 0
     
     def get_role_menu_ids(self, db: Session, *, role_id: int) -> List[int]:
         """

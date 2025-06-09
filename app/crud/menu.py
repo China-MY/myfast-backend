@@ -128,7 +128,9 @@ class CRUDMenu(CRUDBase[SysMenu, MenuCreate, MenuUpdate]):
         """
         判断用户是否是超级管理员
         """
-        return user.is_admin == "Y"
+        # 检查用户是否拥有admin角色
+        admin_roles = [role for role in user.roles if role.role_key == "admin"]
+        return len(admin_roles) > 0
     
     def has_children(self, db: Session, *, menu_id: int) -> bool:
         """

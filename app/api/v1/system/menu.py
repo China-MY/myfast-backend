@@ -67,7 +67,7 @@ def get_menu(
     """
     获取菜单详情
     """
-    menu_obj = menu_crud.get_by_id(db, menu_id=menu_id)
+    menu_obj = menu_crud.get(db, id=menu_id)
     if not menu_obj:
         raise HTTPException(status_code=404, detail="菜单不存在")
     
@@ -87,7 +87,7 @@ def create_menu(
     """
     # 检查父菜单是否存在
     if menu_in.parent_id and menu_in.parent_id != 0:
-        parent = menu_crud.get_by_id(db, menu_id=menu_in.parent_id)
+        parent = menu_crud.get(db, id=menu_in.parent_id)
         if not parent:
             raise HTTPException(status_code=400, detail="父菜单不存在")
     
@@ -107,13 +107,13 @@ def update_menu(
     """
     更新菜单信息
     """
-    menu_obj = menu_crud.get_by_id(db, menu_id=menu_id)
+    menu_obj = menu_crud.get(db, id=menu_id)
     if not menu_obj:
         raise HTTPException(status_code=404, detail="菜单不存在")
     
     # 检查父菜单是否存在
     if menu_in.parent_id and menu_in.parent_id != 0:
-        parent = menu_crud.get_by_id(db, menu_id=menu_in.parent_id)
+        parent = menu_crud.get(db, id=menu_in.parent_id)
         if not parent:
             raise HTTPException(status_code=400, detail="父菜单不存在")
         
@@ -139,7 +139,7 @@ def delete_menu(
     """
     删除菜单
     """
-    menu_obj = menu_crud.get_by_id(db, menu_id=menu_id)
+    menu_obj = menu_crud.get(db, id=menu_id)
     if not menu_obj:
         raise HTTPException(status_code=404, detail="菜单不存在")
     
@@ -147,7 +147,7 @@ def delete_menu(
     if menu_crud.has_children(db, menu_id=menu_id):
         raise HTTPException(status_code=400, detail="存在子菜单，不能删除")
     
-    menu_crud.remove(db, menu_id=menu_id)
+    menu_crud.remove(db, id=menu_id)
     return ResponseModel(msg="删除成功")
 
 

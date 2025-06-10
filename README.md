@@ -169,4 +169,4 @@ uvicorn app.main:app --reload
 
 ---
 
-© 2023-2024 MyFast-Admin 团队. 保留所有权利.
+© 2025-2026 明裕学长 团队. 保留所有权利.

@@ -1,144 +1,108 @@
-# MyFast-Admin
-
-<p align="center">
-  <img src="src/assets/logo.png" width="120" alt="MyFast-Admin Logo" />
-</p>
+# MyFast-Admin 后端
 
 <div align="center">
 
-MyFast-Admin 是一款基于 FastAPI 和 Vue3 的现代化企业级开发框架，提供完整的前后端解决方案。
+MyFast-Admin 是一款基于 FastAPI 和 Vue3 的现代化企业级开发框架，这是项目的后端部分。
 
-[![Vue](https://img.shields.io/badge/Vue-3.x-brightgreen.svg)](https://vuejs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100.0+-blue.svg)](https://fastapi.tiangolo.com/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
-[![Vite](https://img.shields.io/badge/Vite-4.x-yellow.svg)](https://vitejs.dev/)
-[![Element Plus](https://img.shields.io/badge/Element_Plus-2.x-blue.svg)](https://element-plus.org/)
+[![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/)
+[![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-2.0+-orange.svg)](https://www.sqlalchemy.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 </div>
 
 ## 🌟 项目简介
 
-MyFast-Admin 是一款开源的企业级应用开发框架，采用前后端分离架构，旨在提供高效、安全、可扩展的解决方案。框架集成了现代化的前端技术栈和强大的后端支持，帮助开发者快速构建企业级应用。
+MyFast-Admin 后端采用 FastAPI 框架开发，提供高性能、易于使用的 RESTful API 接口，支持前端各项功能的数据处理和业务逻辑。
 
 ## ✨ 核心特性
 
-- **现代化技术栈**：基于 Vue 3、TypeScript、Vite 和 FastAPI 等最新技术
-- **企业级解决方案**：内置权限管理、用户管理、菜单管理等核心功能
-- **组件化开发**：丰富的业务组件和自定义组件库
-- **响应式设计**：自适应多种屏幕尺寸，支持移动端和桌面端
-- **API 自动生成**：后端 API 自动生成文档和类型定义
-- **多语言支持**：内置国际化解决方案
-- **主题定制**：可自定义主题颜色和布局
-- **开发效率工具**：集成代码生成、热重载等开发工具
+- **高性能框架**：基于 FastAPI 和 Pydantic，提供极速的 API 响应
+- **完整的权限系统**：基于 RBAC 模型的权限控制
+- **用户认证**：使用 JWT 令牌的安全认证机制
+- **ORM 支持**：基于 SQLAlchemy 2.0 的数据库访问层
+- **自动文档**：集成 Swagger UI 和 ReDoc 的 API 文档
+- **数据验证**：严格的请求和响应数据验证
+- **异步支持**：支持异步数据库操作和请求处理
+- **系统配置**：灵活的系统参数和字典管理
 
-## 🔥 技术架构
+## 🔥 技术栈
 
-### 前端技术栈
-
-- 核心框架：Vue 3
-- 工程化：Vite 4
-- 语言：TypeScript 5
-- UI 库：Element Plus 2
-- 状态管理：Pinia
-- 路由管理：Vue Router 4
-- HTTP 客户端：Axios
-- CSS 预处理：Sass/SCSS
-
-### 后端技术栈
-
-- 核心框架：FastAPI
-- 语言：Python 3.9+
-- ORM：SQLAlchemy 2.0+
-- 数据库：PostgreSQL/MySQL/SQLite
-- 认证：OAuth2 + JWT
-- 任务队列：Celery（可选）
-- 缓存：Redis（可选）
-- 文档：Swagger/ReDoc
+- **核心框架**：FastAPI
+- **语言**：Python 3.9+
+- **ORM**：SQLAlchemy 2.0+
+- **数据库**：MySQL/SQLite
+- **认证**：OAuth2 + JWT
+- **文档**：Swagger/ReDoc
+- **数据验证**：Pydantic
+- **异步处理**：asyncio
 
 ## 📦 项目结构
+myfast-backend/
+├── app/ # 应用代码
+│ ├── api/ # API 路由
+│ │ ├── deps.py # 依赖项（权限、认证）
+│ │ └── v1/ # API v1 版本
+│ │ ├── auth/ # 认证相关 API
+│ │ ├── system/ # 系统管理 API
+│ │ └── ... # 其他业务模块
+│ ├── core/ # 核心模块
+│ │ ├── config.py # 配置管理
+│ │ ├── security.py # 安全相关
+│ │ └── ...
+│ ├── crud/ # CRUD 操作
+│ │ ├── base.py # 基础 CRUD 类
+│ │ ├── user.py # 用户 CRUD
+│ │ ├── role.py # 角色 CRUD
+│ │ ├── dict.py # 字典 CRUD
+│ │ └── ...
+│ ├── db/ # 数据库相关
+│ │ ├── base.py # 基础配置
+│ │ ├── base_class.py # 基础模型类
+│ │ └── session.py # 会话管理
+│ ├── models/ # 数据模型
+│ │ ├── user.py # 用户模型
+│ │ ├── role.py # 角色模型
+│ │ ├── menu.py # 菜单模型
+│ │ ├── dict.py # 字典模型
+│ │ └── ...
+│ ├── schemas/ # Pydantic 模式
+│ │ ├── user.py # 用户模式
+│ │ ├── role.py # 角色模式
+│ │ ├── dict.py # 字典模式
+│ │ └── ...
+│ └── main.py # 应用入口
+├── requirements.txt # 依赖列表
+└── README.md # 项目说明
 
-```
-myfast-frontend/            # 前端项目目录
-├── public/                 # 静态资源
-├── src/                    # 源码目录
-│   ├── api/                # API 接口
-│   ├── assets/             # 资源文件
-│   ├── components/         # 公共组件
-│   ├── composables/        # 组合式函数
-│   ├── layouts/            # 布局组件
-│   ├── router/             # 路由配置
-│   ├── store/              # 状态管理
-│   ├── styles/             # 全局样式
-│   ├── utils/              # 工具函数
-│   └── views/              # 页面视图
-├── .env.development        # 开发环境变量
-├── .env.production         # 生产环境变量
-└── vite.config.ts          # Vite 配置
-
-myfast-backend/             # 后端项目目录
-├── app/                    # 应用代码
-│   ├── api/                # API 路由
-│   ├── core/               # 核心模块
-│   ├── crud/               # CRUD 操作
-│   ├── db/                 # 数据库模型和会话
-│   ├── models/             # 数据模型
-│   ├── schemas/            # Pydantic 模式
-│   └── services/           # 业务服务
-├── static/                 # 静态文件
-└── tests/                  # 测试代码
-```
 
 ## 🚀 快速开始
 
-### 前端开发
+### 环境要求
 
-1. 安装依赖
+- Python 3.9+
+- 数据库：MySQL/SQLite
 
-```bash
-cd myfast-frontend
-npm install
-```
+### 安装步骤
 
-2. 启动开发服务器
+1. 克隆仓库
 
 ```bash
-npm run dev
+git clone https://github.com/yourusername/myfast-admin.git
+cd myfast-backend
 ```
 
-3. 构建生产版本
-
-```bash
-npm run build
-```
-
-4. 代码检查
-
-```bash
-npm run lint
-```
-
-### 后端开发
-
-1. 创建虚拟环境
+2. 创建虚拟环境
 
 ```bash
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 ```
 
-2. 安装依赖
+3. 安装依赖
 
 ```bash
-cd myfast-backend
 pip install -r requirements.txt
-```
-
-3. 设置环境变量
-
-```bash
-# 创建 .env 文件并添加必要的环境变量
-touch .env
 ```
 
 4. 启动开发服务器
@@ -147,59 +111,61 @@ touch .env
 uvicorn app.main:app --reload
 ```
 
-## 💻 开发指南
+5. 访问 API 文档
 
-### IDE 推荐
+## 📃 API 功能列表
 
-- [VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar)（并禁用 Vetur）
-
-### Vue 类型支持
-
-TypeScript 默认无法处理 `.vue` 导入的类型信息，因此我们使用 `vue-tsc` 替代 `tsc` 进行类型检查。在编辑器中，需要 [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) 使 TypeScript 语言服务能够识别 `.vue` 类型。
-
-### 自定义配置
-
-查看 [Vite 配置参考](https://vitejs.dev/config/) 获取更多配置信息。
-
-## 📃 功能列表
-
-- 用户认证
-  - 登录/注册
-  - 第三方登录集成
-  - 多因素认证
+- **认证管理**
+  - 用户登录
+  - 注册
+  - 令牌刷新
   
-- 用户管理
+- **用户管理**
   - 用户列表
   - 用户详情
+  - 用户创建/更新/删除
   - 用户角色分配
   
-- 角色管理
+- **角色管理**
   - 角色列表
-  - 权限分配
+  - 角色权限分配
+  - 角色创建/更新/删除
   
-- 菜单管理
+- **菜单管理**
   - 菜单树
-  - 动态路由
+  - 菜单创建/更新/删除
   
-- 部门管理
-  - 部门树
-  - 人员分配
+- **字典管理**
+  - 字典类型管理
+  - 字典数据管理
+  - 支持按字典类型查询字典数据
+  - 字典数据的增删改查
   
-- 系统配置
+- **系统配置**
   - 参数设置
-  - 字典管理
-  
-- 操作日志
-  - 登录日志
-  - 操作审计
+  - 系统配置管理
+
+## 💻 开发指南
+
+### 添加新的 API 端点
+
+1. 在 `app/api/v1/` 下创建新的路由文件
+2. 在 `app/models/` 中定义数据模型
+3. 在 `app/schemas/` 中创建请求和响应模式
+4. 在 `app/crud/` 中实现 CRUD 操作
+5. 在 `app/api/v1/your_module.py` 中实现 API 逻辑
+
+### 数据库迁移
+
+项目使用 SQLAlchemy 模型定义数据库结构。如果需要进行数据库迁移，可以考虑使用 Alembic 工具。
 
 ## 🔐 安全建议
 
 - 定期更新依赖包
-- 启用 HTTPS
-- 实施 CSRF 保护
-- 使用安全的认证方式
-- 进行输入验证和过滤
+- 使用环境变量存储敏感信息
+- 实施适当的速率限制
+- 启用 CORS 保护
+- 使用 HTTPS
 
 ## 🤝 参与贡献
 
@@ -212,11 +178,6 @@ TypeScript 默认无法处理 `.vue` 导入的类型信息，因此我们使用 
 ## 📄 许可证
 
 [MIT License](LICENSE)
-
-## 📬 联系方式
-
-- 项目维护者：[维护者姓名]
-- 电子邮件：[邮箱地址]
 
 ---
 

@@ -28,7 +28,7 @@ class SysDictData(Base):
     dict_label = Column(String(100), nullable=False, comment="字典标签")
     dict_value = Column(String(100), nullable=False, comment="字典键值")
     dict_type = Column(String(100), nullable=False, comment="字典类型")
-    css_class = Column(String(100), comment="样式属性（其他样式扩展）")
+    css_class = Column(String(100), comment="样式属性")
     list_class = Column(String(100), comment="表格回显样式")
     is_default = Column(String(1), default="N", comment="是否默认（Y是 N否）")
     status = Column(String(1), default="0", comment="状态（0正常 1停用）")

@@ -38,42 +38,34 @@ MyFast-Admin 后端采用 FastAPI 框架开发，提供高性能、易于使用�
 - **异步处理**：asyncio
 
 ## 📦 项目结构
-myfast-backend/
-├── app/ # 应用代码
-│ ├── api/ # API 路由
-│ │ ├── deps.py # 依赖项（权限、认证）
-│ │ └── v1/ # API v1 版本
-│ │ ├── auth/ # 认证相关 API
-│ │ ├── system/ # 系统管理 API
-│ │ └── ... # 其他业务模块
-│ ├── core/ # 核心模块
-│ │ ├── config.py # 配置管理
-│ │ ├── security.py # 安全相关
-│ │ └── ...
-│ ├── crud/ # CRUD 操作
-│ │ ├── base.py # 基础 CRUD 类
-│ │ ├── user.py # 用户 CRUD
-│ │ ├── role.py # 角色 CRUD
-│ │ ├── dict.py # 字典 CRUD
-│ │ └── ...
-│ ├── db/ # 数据库相关
-│ │ ├── base.py # 基础配置
-│ │ ├── base_class.py # 基础模型类
-│ │ └── session.py # 会话管理
-│ ├── models/ # 数据模型
-│ │ ├── user.py # 用户模型
-│ │ ├── role.py # 角色模型
-│ │ ├── menu.py # 菜单模型
-│ │ ├── dict.py # 字典模型
-│ │ └── ...
-│ ├── schemas/ # Pydantic 模式
-│ │ ├── user.py # 用户模式
-│ │ ├── role.py # 角色模式
-│ │ ├── dict.py # 字典模式
-│ │ └── ...
-│ └── main.py # 应用入口
-├── requirements.txt # 依赖列表
-└── README.md # 项目说明
+   myfast-backend/
+   ├── app/
+   │   ├── api/                # API路由
+   │   │   ├── deps.py         # 依赖项
+   │   │   └── v1/             # API v1版本
+   │   │       ├── auth/       # 认证相关API
+   │   │       ├── system/     # 系统管理API
+   │   │       └── ...
+   │   ├── core/               # 核心配置
+   │   ├── modules/            # 按业务模块组织代码
+   │   │   ├── dict/           # 字典模块
+   │   │   │   ├── crud.py     # CRUD操作
+   │   │   │   ├── models.py   # 数据模型
+   │   │   │   └── schemas.py  # 数据架构
+   │   │   ├── user/           # 用户模块
+   │   │   └── ...             # 其他模块
+   │   ├── db/                 # 数据库相关
+   │   ├── utils/              # 工具函数(合并common)
+   │   └── main.py             # 应用入口
+   ├── tests/                  # 测试代码
+   │   ├── api/                # API测试
+   │   └── unit/               # 单元测试
+   ├── docs/                   # 项目文档
+   ├── deployment/             # 部署配置
+   │   ├── docker/             # Docker配置
+   │   └── environments/       # 环境配置
+   ├── requirements.txt        # 依赖列表
+   └── README.md               # 项目说明
 
 
 ## 🚀 快速开始

@@ -76,7 +76,7 @@ myfast-backend/
 1. 克隆仓库
 
 ```bash
-git clone https://github.com/yourusername/myfast-admin.git
+git clone https://gitee.com/myxzgzs/myfast-backend.git
 cd myfast-backend
 ```
 

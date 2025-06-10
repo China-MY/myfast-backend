@@ -55,7 +55,7 @@ def get_dept(
     """
     获取部门详情
     """
-    dept_obj = dept_crud.get_by_id(db, dept_id=dept_id)
+    dept_obj = dept_crud.get_by_field(db, field="dept_id", value=dept_id)
     if not dept_obj:
         raise HTTPException(status_code=404, detail="部门不存在")
     
@@ -75,7 +75,7 @@ def create_dept(
     """
     # 检查父部门是否存在
     if dept_in.parent_id and dept_in.parent_id != 0:
-        parent = dept_crud.get_by_id(db, dept_id=dept_in.parent_id)
+        parent = dept_crud.get_by_field(db, field="dept_id", value=dept_in.parent_id)
         if not parent:
             raise HTTPException(status_code=400, detail="父部门不存在")
     
@@ -99,13 +99,13 @@ def update_dept(
     """
     更新部门信息
     """
-    dept_obj = dept_crud.get_by_id(db, dept_id=dept_id)
+    dept_obj = dept_crud.get_by_field(db, field="dept_id", value=dept_id)
     if not dept_obj:
         raise HTTPException(status_code=404, detail="部门不存在")
     
     # 检查父部门是否存在
     if dept_in.parent_id and dept_in.parent_id != 0:
-        parent = dept_crud.get_by_id(db, dept_id=dept_in.parent_id)
+        parent = dept_crud.get_by_field(db, field="dept_id", value=dept_in.parent_id)
         if not parent:
             raise HTTPException(status_code=400, detail="父部门不存在")
         
@@ -137,7 +137,7 @@ def delete_dept(
     """
     删除部门
     """
-    dept_obj = dept_crud.get_by_id(db, dept_id=dept_id)
+    dept_obj = dept_crud.get_by_field(db, field="dept_id", value=dept_id)
     if not dept_obj:
         raise HTTPException(status_code=404, detail="部门不存在")
     
@@ -149,7 +149,7 @@ def delete_dept(
     if dept_crud.has_users(db, dept_id=dept_id):
         raise HTTPException(status_code=400, detail="部门下存在用户，不能删除")
     
-    dept_crud.remove(db, dept_id=dept_id)
+    dept_crud.remove(db, id=dept_id)
     return ResponseModel(msg="删除成功")
 
 

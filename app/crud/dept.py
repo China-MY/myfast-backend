@@ -5,6 +5,7 @@ from sqlalchemy import func, or_, and_
 from app.crud.base import CRUDBase
 from app.models.dept import SysDept
 from app.schemas.dept import DeptCreate, DeptUpdate, DeptTree
+from app.models.user import SysUser  # 导入用户模型
 
 
 class CRUDDept(CRUDBase[SysDept, DeptCreate, DeptUpdate]):
@@ -28,6 +29,31 @@ class CRUDDept(CRUDBase[SysDept, DeptCreate, DeptUpdate]):
         depts = query.order_by(self.model.parent_id, self.model.order_num).all()
         
         return depts
+    
+    def get_by_name(self, db: Session, *, dept_name: str, parent_id: Optional[int] = None) -> Optional[SysDept]:
+        """
+        根据部门名称和父ID获取部门
+        """
+        query = db.query(self.model).filter(self.model.dept_name == dept_name)
+        if parent_id is not None:
+            query = query.filter(self.model.parent_id == parent_id)
+        return query.first()
+    
+    def has_users(self, db: Session, *, dept_id: int) -> bool:
+        """
+        检查部门是否有关联用户
+        """
+        return db.query(SysUser).filter(SysUser.dept_id == dept_id).first() is not None
+    
+    def remove(self, db: Session, *, id: int) -> SysDept:
+        """
+        删除部门（重写基类的remove方法）
+        """
+        obj = db.query(self.model).get(id)
+        if obj:
+            db.delete(obj)
+            db.commit()
+        return obj
     
     def get_tree(self, db: Session, *, status: Optional[str] = None) -> List[DeptTree]:
         """

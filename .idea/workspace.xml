@@ -4,11 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a0c2172a-e9ef-42da-a8de-d9ba53ff549d" name="更改" comment="20250604-登录注册功能已完成">
+    <list default="true" id="a0c2172a-e9ef-42da-a8de-d9ba53ff549d" name="更改" comment="20250609-待修复自动渲染路由">
+      <change beforePath="$PROJECT_DIR$/.idea/CopilotChatHistory.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/CopilotChatHistory.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/crud/menu.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/crud/menu.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/crud/role.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/crud/role.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/schemas/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/server.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/system/dept.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/system/dept.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/crud/dept.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/crud/dept.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -116,6 +116,7 @@
       <workItem from="1749178690057" duration="146000" />
       <workItem from="1749179377728" duration="1209000" />
       <workItem from="1749361041490" duration="6606000" />
+      <workItem from="1749527508017" duration="75000" />
     </task>
     <task id="LOCAL-00001" summary="20250602-添加注释">
       <option name="closed" value="true" />
@@ -141,7 +142,15 @@
       <option name="project" value="LOCAL" />
       <updated>1749028678629</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="20250609-待修复自动渲染路由">
+      <option name="closed" value="true" />
+      <created>1749461933051</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1749461933051</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -162,7 +171,8 @@
     <MESSAGE value="20250602-添加注释" />
     <MESSAGE value="20250603-修改部分" />
     <MESSAGE value="20250604-登录注册功能已完成" />
-    <option name="LAST_COMMIT_MESSAGE" value="20250604-登录注册功能已完成" />
+    <MESSAGE value="20250609-待修复自动渲染路由" />
+    <option name="LAST_COMMIT_MESSAGE" value="20250609-待修复自动渲染路由" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/myfast_backend$init_app.coverage" NAME="init_app 覆盖结果" MODIFIED="1749001496794" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

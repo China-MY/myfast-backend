@@ -64,11 +64,22 @@ class RoleBrief(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+# 岗位简要信息
+class PostBrief(BaseModel):
+    """岗位简要信息"""
+    post_id: int = Field(..., description="岗位ID", example=1)
+    post_name: str = Field(..., description="岗位名称", example="董事长")
+    post_code: str = Field(..., description="岗位编码", example="ceo")
+    
+    model_config = ConfigDict(from_attributes=True)
+
+
 # API返回的用户模型
 class User(UserInDB):
     """返回用户模型"""
     roles: Optional[List[RoleBrief]] = Field([], description="用户角色列表")
     dept: Optional[DeptBrief] = Field(None, description="用户部门")
+    posts: Optional[List[PostBrief]] = Field([], description="用户岗位列表")
     
     model_config = ConfigDict(from_attributes=True)
 

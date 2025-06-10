@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.crud.base import CRUDBase
 from app.models.user import SysUser
 from app.models.role import SysRole
+from app.models.post import SysPost
 from app.schemas.user import UserCreate, UserUpdate
 from app.utils.password import get_password_hash, verify_password
 
@@ -48,6 +49,12 @@ class CRUDUser(CRUDBase[SysUser, UserCreate, UserUpdate]):
             db_obj.roles = roles
             db.commit()
             
+        # 添加岗位关联
+        if obj_in.post_ids:
+            posts = db.query(SysPost).filter(SysPost.post_id.in_(obj_in.post_ids)).all()
+            db_obj.posts = posts
+            db.commit()
+            
         return db_obj
     
     def update(
@@ -74,17 +81,28 @@ class CRUDUser(CRUDBase[SysUser, UserCreate, UserUpdate]):
         role_ids = None
         if "role_ids" in update_data:
             role_ids = update_data.pop("role_ids", None)
+            
+        # 岗位处理
+        post_ids = None
+        if "post_ids" in update_data:
+            post_ids = update_data.pop("post_ids", None)
         
         # 调用父类方法完成更新
         result = super().update(db, db_obj=db_obj, obj_in=update_data)
         
         # 更新角色关系
-        if role_ids:
+        if role_ids is not None:
             roles = db.query(SysRole).filter(SysRole.role_id.in_(role_ids)).all()
             result.roles = roles
             db.commit()
-            db.refresh(result)
-        
+            
+        # 更新岗位关系
+        if post_ids is not None:
+            posts = db.query(SysPost).filter(SysPost.post_id.in_(post_ids)).all()
+            result.posts = posts
+            db.commit()
+            
+        db.refresh(result)
         return result
     
     def authenticate(self, db: Session, *, username: str, password: str) -> Optional[SysUser]:

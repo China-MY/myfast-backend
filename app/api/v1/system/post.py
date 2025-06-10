@@ -7,13 +7,13 @@ from app.api.deps import get_db, get_current_active_user, check_permissions
 from app.models.user import SysUser
 from app.models.post import SysPost
 from app.schemas.post import PostCreate, PostUpdate, PostOut
-from app.schemas.common import ResponseModel, PageResponseModel
+from app.schemas.common import ResponseModel, PageResponseModel, PageInfo
 from app.crud.post import post as post_crud
 
 router = APIRouter()
 
 
-@router.get("/list", response_model=PageResponseModel[List[PostOut]], summary="获取岗位列表", description="分页获取岗位列表")
+@router.get("/list", response_model=PageResponseModel[PostOut], summary="获取岗位列表", description="分页获取岗位列表")
 def list_posts(
     db: Session = Depends(get_db),
     *,
@@ -27,22 +27,33 @@ def list_posts(
     """
     获取岗位列表
     """
-    skip = (page - 1) * page_size
-    posts, total = post_crud.get_multi_with_filter(
-        db, 
-        skip=skip, 
-        limit=page_size,
-        post_code=post_code,
-        post_name=post_name,
-        status=status
-    )
-    
-    return PageResponseModel[List[PostOut]](
-        data=posts,
-        total=total,
-        page=page,
-        page_size=page_size
-    )
+    try:
+        skip = (page - 1) * page_size
+        posts, total = post_crud.get_multi_with_filter(
+            db, 
+            skip=skip, 
+            limit=page_size,
+            post_code=post_code,
+            post_name=post_name,
+            status=status
+        )
+        
+        # 转换为Pydantic模型
+        post_list = [PostOut.model_validate(post) for post in posts]
+        
+        return PageResponseModel[PostOut](
+            rows=post_list,
+            pageInfo=PageInfo(
+                page=page,
+                pageSize=page_size,
+                total=total
+            )
+        )
+    except Exception as e:
+        import traceback
+        print(f"获取岗位列表出错: {str(e)}")
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"服务器错误: {str(e)}")
 
 
 @router.get("/{post_id}", response_model=ResponseModel[PostOut], summary="获取岗位详情", description="根据岗位ID获取岗位详情")

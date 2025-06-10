@@ -4,11 +4,18 @@ from sqlalchemy import func, or_, and_
 
 from app.crud.base import CRUDBase
 from app.models.post import SysPost
+from app.models.user import SysUser  # 添加用户模型导入
 from app.schemas.post import PostCreate, PostUpdate
 
 
 class CRUDPost(CRUDBase[SysPost, PostCreate, PostUpdate]):
     """岗位数据访问层"""
+    
+    def get_by_id(self, db: Session, *, post_id: int) -> Optional[SysPost]:
+        """
+        根据岗位ID获取岗位
+        """
+        return db.query(self.model).filter(self.model.post_id == post_id).first()
     
     def get_by_name(self, db: Session, *, post_name: str) -> Optional[SysPost]:
         """
@@ -46,6 +53,15 @@ class CRUDPost(CRUDBase[SysPost, PostCreate, PostUpdate]):
         posts = query.order_by(self.model.post_sort).offset(skip).limit(limit).all()
         
         return posts, total
+    
+    def has_users(self, db: Session, *, post_id: int) -> bool:
+        """
+        检查岗位是否已分配用户
+        """
+        post = self.get_by_id(db, post_id=post_id)
+        if not post:
+            return False
+        return len(post.users) > 0
     
     def get_enabled_posts(self, db: Session) -> List[SysPost]:
         """
@@ -85,6 +101,15 @@ class CRUDPost(CRUDBase[SysPost, PostCreate, PostUpdate]):
         update_data["update_by"] = str(updater_id)
         
         return super().update(db, db_obj=db_obj, obj_in=update_data)
+    
+    def remove(self, db: Session, *, post_id: int) -> None:
+        """
+        删除岗位
+        """
+        db_obj = db.query(self.model).filter(self.model.post_id == post_id).first()
+        if db_obj:
+            db.delete(db_obj)
+            db.commit()
 
 
 # 实例化

@@ -77,6 +77,8 @@ myfast-backend/
 
 ```bash
 git clone https://gitee.com/myxzgzs/myfast-backend.git
+或
+git clone https://github.com/China-MY/myfast-backend.git
 cd myfast-backend
 ```
 

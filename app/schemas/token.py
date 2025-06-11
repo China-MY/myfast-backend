@@ -4,9 +4,10 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class Token(BaseModel):
-    """令牌模型"""
+    """令牌信息"""
     access_token: str = Field(..., description="访问令牌")
-    token_type: str = Field(..., description="令牌类型，通常是bearer")
+    token_type: str = Field(..., description="令牌类型")
+    expires_in: int = Field(0, description="过期时间(秒)")
     
     model_config = ConfigDict(
         json_schema_extra={
@@ -19,9 +20,9 @@ class Token(BaseModel):
 
 
 class TokenPayload(BaseModel):
-    """令牌载荷"""
-    sub: Optional[str] = Field(None, description="用户ID")
-    exp: Optional[int] = Field(None, description="过期时间戳")
+    """令牌负载"""
+    sub: Optional[str] = None
+    exp: Optional[int] = None
     
     model_config = ConfigDict(
         json_schema_extra={

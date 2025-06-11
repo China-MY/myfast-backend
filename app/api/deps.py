@@ -1,16 +1,20 @@
 from typing import Generator, Optional
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
+from datetime import datetime
 
 from app.db.session import SessionLocal
 from app.core.config import settings
 from app.models.user import SysUser
 from app.crud.user import user
 from app.schemas.token import TokenPayload
+from app.service.online import online_service, ONLINE_KEY_PREFIX
+from app.core.redis import redis_client
+import json
 
 
 # 创建OAuth2PasswordBearer依赖项
@@ -29,7 +33,9 @@ def get_db() -> Generator:
 
 
 def get_current_user(
-    db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
+    request: Request = None,
+    db: Session = Depends(get_db), 
+    token: str = Depends(oauth2_scheme)
 ) -> SysUser:
     """
     获取当前用户
@@ -54,6 +60,32 @@ def get_current_user(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="用户不存在"
         )
+    
+    # 尝试更新在线用户的最后访问时间
+    try:
+        key = f"{ONLINE_KEY_PREFIX}{token}"
+        if redis_client.exists(key):
+            # 获取当前用户信息
+            user_data = redis_client.get(key)
+            if user_data:
+                user_info = json.loads(user_data)
+                # 更新最后访问时间
+                current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                user_info["last_access_time"] = current_time
+                
+                # 如果有请求信息，更新IP地址
+                if request and hasattr(request, "client") and request.client:
+                    user_info["ipaddr"] = request.client.host
+                
+                # 重新保存到Redis，并重置过期时间
+                redis_client.setex(
+                    key,
+                    settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+                    json.dumps(user_info)
+                )
+    except Exception as e:
+        # 更新在线状态失败不应影响正常业务逻辑
+        print(f"[WARN] 更新在线用户状态失败: {str(e)}")
     
     return user_obj
 

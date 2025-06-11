@@ -1,36 +1,39 @@
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, Request
+
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, get_current_active_user
+from app.api.deps import get_db, get_current_user
 from app.models.user import SysUser
 from app.schemas.common import ResponseModel
+from app.service.online import online_service
 
 router = APIRouter()
 
 
-@router.post("/logout", response_model=ResponseModel, summary="用户注销", description="注销当前用户的登录状态")
+@router.post("", response_model=ResponseModel, summary="退出登录", description="用户退出系统登录")
 def logout(
+    request: Request,
     db: Session = Depends(get_db),
-    current_user: SysUser = Depends(get_current_active_user)
+    current_user: SysUser = Depends(get_current_user),
 ) -> Any:
     """
-    用户注销接口
-    
-    该接口会使当前登录用户的会话失效
-    注意: 由于JWT令牌无法在服务端强制失效，完整的注销应由前端配合实现
-    前端应在调用此接口后：
-    1. 清除本地存储的令牌
-    2. 重定向到登录页面
-    
-    返回:
-    - 注销成功的响应
+    退出登录接口
     """
-    # 记录注销操作
-    # 这里可以添加后续的审计日志记录、更新用户状态等操作
+    # 获取请求头中的Authorization
+    auth_header = request.headers.get("Authorization", "")
+    token = ""
     
-    return ResponseModel(
-        code=200,
-        msg="注销成功"
-    ) 
+    # 从Authorization头中提取token
+    if auth_header and auth_header.startswith("Bearer "):
+        token = auth_header[7:]  # 去除"Bearer "前缀
+    
+    if token:
+        # 从Redis中移除在线用户记录
+        print(f"[DEBUG] 用户退出登录: 用户ID={current_user.user_id}, 用户名={current_user.username}, Token={token[:10]}...")
+        online_service.remove_online_user(token)
+    else:
+        print(f"[WARN] 用户退出登录但未找到Token: 用户ID={current_user.user_id}, 用户名={current_user.username}")
+    
+    return ResponseModel(msg="退出成功") 

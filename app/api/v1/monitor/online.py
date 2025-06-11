@@ -1,4 +1,5 @@
 from typing import Any, List, Optional
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -12,7 +13,7 @@ from app.service.online import online_service
 router = APIRouter()
 
 
-@router.get("/list", response_model=PageResponseModel[List[OnlineUserOut]], summary="获取在线用户列表", description="分页获取在线用户列表")
+@router.get("/list", summary="获取在线用户列表", description="分页获取在线用户列表")
 def list_online_users(
     db: Session = Depends(get_db),
     *,
@@ -25,6 +26,7 @@ def list_online_users(
     """
     获取在线用户列表
     """
+    print(f"[DEBUG] list_online_users API调用 - 参数: ipaddr={ipaddr}, username={username}, page={page}, page_size={page_size}")
     skip = (page - 1) * page_size
     online_users, total = online_service.get_online_users(
         db,
@@ -34,12 +36,36 @@ def list_online_users(
         username=username
     )
     
-    return PageResponseModel[List[OnlineUserOut]](
-        data=online_users,
-        total=total,
-        page=page,
-        page_size=page_size
-    )
+    print(f"[DEBUG] 返回在线用户数量: {len(online_users)}, 总数: {total}")
+    
+    # 如果返回的用户列表为空但应该有数据，记录警告
+    if not online_users and total > 0:
+        print("[WARN] 在线用户列表返回空，但总数不为0")
+    
+    # 将返回的数据转换为纯字典格式，移除datetime对象
+    online_users_dict = []
+    for user in online_users:
+        user_dict = user.model_dump()
+        # 转换日期时间字段为字符串
+        if isinstance(user_dict.get("start_timestamp"), datetime):
+            user_dict["start_timestamp"] = user_dict["start_timestamp"].strftime("%Y-%m-%d %H:%M:%S")
+        if isinstance(user_dict.get("last_access_time"), datetime):
+            user_dict["last_access_time"] = user_dict["last_access_time"].strftime("%Y-%m-%d %H:%M:%S")
+        online_users_dict.append(user_dict)
+    
+    print(f"[DEBUG] 返回前的用户数据: {online_users_dict}")
+    
+    # 直接返回标准格式，不使用响应模型验证
+    return {
+        "code": 200,
+        "msg": "操作成功",
+        "rows": online_users_dict,
+        "pageInfo": {
+            "page": page,
+            "pageSize": page_size,
+            "total": total
+        }
+    }
 
 
 @router.delete("/{token}", response_model=ResponseModel, summary="强制退出登录", description="强制用户退出登录")

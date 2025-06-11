@@ -13,6 +13,9 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 def create_access_token(
     subject: Union[str, Any], expires_delta: Optional[timedelta] = None
 ) -> str:
+    """
+    创建访问令牌
+    """
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
@@ -20,9 +23,11 @@ def create_access_token(
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
     to_encode = {"exp": expire, "sub": str(subject)}
-    encoded_jwt = jwt.encode(
-        to_encode, settings.SECRET_KEY, algorithm="HS256"
-    )
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    
+    # 输出调试信息
+    print(f"[DEBUG] 创建访问令牌: subject={subject}, expires={expire}")
+    
     return encoded_jwt
 
 # 验证密码

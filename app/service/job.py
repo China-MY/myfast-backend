@@ -1,21 +1,47 @@
 import json
 import time
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
 from app.crud.job import job as job_crud, job_log as job_log_crud
-from app.models.job import SysJob
+from app.models.job import SysJob, SysJobLog
 from app.schemas.job import JobCreate, JobUpdate, JobLogCreate
 
 
 class JobService:
     """任务调度服务"""
     
+    def get_job_by_id(self, db: Session, job_id: int) -> Optional[SysJob]:
+        """根据ID获取任务信息"""
+        return job_crud.get(db, id=job_id)
+    
     def get_job(self, db: Session, job_id: int) -> Optional[SysJob]:
         """获取任务信息"""
         return job_crud.get(db, id=job_id)
+    
+    def get_jobs(
+        self, 
+        db: Session, 
+        skip: int = 0,
+        limit: int = 10,
+        job_name: str = None, 
+        job_group: str = None, 
+        status: str = None
+    ) -> Tuple[List[SysJob], int]:
+        """获取任务列表"""
+        print(f"[DEBUG] service.get_jobs - 参数: skip={skip}, limit={limit}, job_name={job_name}, job_group={job_group}, status={status}")
+        result = job_crud.search_by_keyword(
+            db,
+            job_name=job_name,
+            job_group=job_group,
+            status=status,
+            page=skip // limit + 1 if limit > 0 else 1,
+            page_size=limit
+        )
+        print(f"[DEBUG] service.get_jobs - 结果类型: items={type(result['items'])}, 第一条={type(result['items'][0]) if result['items'] else 'None'}")
+        return result["items"], result["total"]
     
     def get_job_list(
         self, 
@@ -68,13 +94,15 @@ class JobService:
         if not db_obj:
             return {"success": False, "message": "任务不存在"}
         
-        # 创建任务日志
+        # 创建任务日志（移除不存在的字段）
         job_log_obj = JobLogCreate(
-            job_id=job_id,
+            # job_id字段在数据库中不存在，移除
+            # job_id=job_id,
             job_name=db_obj.job_name,
             job_group=db_obj.job_group,
             invoke_target=db_obj.invoke_target,
-            start_time=datetime.now()
+            # start_time字段在数据库中不存在，移除
+            # start_time=datetime.now()
         )
         
         # 记录执行开始
@@ -85,8 +113,8 @@ class JobService:
             # 例如：通过importlib动态导入模块并执行函数
             time.sleep(1)  # 模拟任务执行
             
-            # 更新任务日志
-            job_log.end_time = datetime.now()
+            # 更新任务日志（移除不存在的字段）
+            # job_log.end_time = datetime.now()  # end_time字段在数据库中不存在，移除
             job_log.status = "0"  # 成功
             job_log.job_message = "执行成功"
             db.add(job_log)
@@ -95,8 +123,8 @@ class JobService:
             
             return {"success": True, "message": "任务执行成功"}
         except Exception as e:
-            # 更新任务日志
-            job_log.end_time = datetime.now()
+            # 更新任务日志（移除不存在的字段）
+            # job_log.end_time = datetime.now()  # end_time字段在数据库中不存在，移除
             job_log.status = "1"  # 失败
             job_log.job_message = "执行失败"
             job_log.exception_info = str(e)
@@ -105,6 +133,29 @@ class JobService:
             db.refresh(job_log)
             
             return {"success": False, "message": f"任务执行失败: {str(e)}"}
+    
+    def get_job_logs(
+        self, 
+        db: Session, 
+        skip: int = 0,
+        limit: int = 10,
+        job_name: str = None, 
+        job_group: str = None,
+        job_id: int = None,
+        status: str = None
+    ) -> Tuple[List[SysJobLog], int]:
+        """获取任务日志列表"""
+        print(f"[DEBUG] JobService.get_job_logs - 参数: job_name={job_name}, job_group={job_group}, job_id={job_id}, status={status}")
+        result = job_log_crud.search_by_keyword(
+            db,
+            job_name=job_name,
+            job_group=job_group,
+            status=status,
+            page=skip // limit + 1 if limit > 0 else 1,
+            page_size=limit
+        )
+        
+        return result["items"], result["total"]
     
     def get_job_log_list(
         self, 
@@ -125,17 +176,36 @@ class JobService:
             page_size=page_size
         )
         
-        # 计算执行时间
-        for item in result["items"]:
-            if item.start_time and item.end_time:
-                run_time = (item.end_time - item.start_time).total_seconds()
-                setattr(item, "run_time", round(run_time, 3))
-        
         return result
     
     def clean_job_logs(self, db: Session) -> int:
         """清空任务日志"""
         return job_log_crud.clean(db)
+
+    def run_job_once(self, db: Session, job_id: int) -> Dict[str, Any]:
+        """立即执行一次任务"""
+        return self.run_job(db, job_id=job_id)
+    
+    def clean_all_job_logs(self, db: Session) -> int:
+        """清空所有任务日志"""
+        return self.clean_job_logs(db)
+
+    def change_job_status(self, db: Session, job_id: int, status: str, updater_id: int) -> Optional[SysJob]:
+        """修改任务状态"""
+        # 获取用户名
+        db_obj = job_crud.get(db, id=job_id)
+        if not db_obj:
+            return None
+        
+        # 更新状态
+        db_obj.status = status
+        db_obj.update_by = str(updater_id)
+        db_obj.update_time = datetime.now()
+        
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        return db_obj
 
 
 job_service = JobService() 

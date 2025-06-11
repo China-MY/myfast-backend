@@ -17,7 +17,9 @@ class JobBase(BaseModel):
 
 class JobCreate(JobBase):
     """创建任务的Schema"""
-    job_params: Optional[str] = Field(None, description="任务参数")
+    # 移除job_params字段，因为数据库中不存在该字段
+    # job_params: Optional[str] = Field(None, description="任务参数")
+    pass
 
 
 class JobUpdate(JobBase):
@@ -26,13 +28,15 @@ class JobUpdate(JobBase):
     job_name: Optional[str] = Field(None, description="任务名称")
     job_group: Optional[str] = Field(None, description="任务组名")
     invoke_target: Optional[str] = Field(None, description="调用目标字符串")
-    job_params: Optional[str] = Field(None, description="任务参数")
+    # 移除job_params字段
+    # job_params: Optional[str] = Field(None, description="任务参数")
 
 
 class JobInDBBase(JobBase):
     """数据库中任务的Schema"""
     job_id: int
-    job_params: Optional[str] = None
+    # 移除job_params字段
+    # job_params: Optional[str] = None
     create_by: str
     create_time: datetime
     update_by: Optional[str] = None
@@ -64,17 +68,20 @@ class JobLogBase(BaseModel):
 
 class JobLogCreate(JobLogBase):
     """创建任务日志的Schema"""
-    job_id: Optional[int] = Field(None, description="任务ID")
-    start_time: Optional[datetime] = Field(None, description="开始时间")
-    end_time: Optional[datetime] = Field(None, description="结束时间")
+    # 以下字段在数据库表中不存在，移除
+    # job_id: Optional[int] = Field(None, description="任务ID")
+    # start_time: Optional[datetime] = Field(None, description="开始时间")
+    # end_time: Optional[datetime] = Field(None, description="结束时间")
+    pass
 
 
 class JobLogInDBBase(JobLogBase):
     """数据库中任务日志的Schema"""
     job_log_id: int
-    job_id: Optional[int] = None
-    start_time: Optional[datetime] = None
-    end_time: Optional[datetime] = None
+    # 以下字段在数据库表中不存在，移除
+    # job_id: Optional[int] = None
+    # start_time: Optional[datetime] = None
+    # end_time: Optional[datetime] = None
     create_time: datetime
     
     model_config = {"from_attributes": True}
@@ -82,7 +89,9 @@ class JobLogInDBBase(JobLogBase):
 
 class JobLogOut(JobLogInDBBase):
     """返回的任务日志Schema"""
-    run_time: Optional[float] = None
+    # 由于start_time和end_time不存在，无法计算运行时间
+    # run_time: Optional[float] = None
+    pass
 
 
 class JobLogPagination(BaseModel):

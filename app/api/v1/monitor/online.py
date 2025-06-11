@@ -77,7 +77,7 @@ def batch_force_logout(
     批量强制用户退出登录
     """
     # 过滤掉当前用户自己的token
-    tokens = [token for token in params.tokens if not online_service.is_current_user_token(token, current_user)]
+    tokens = [token for token in params.session_ids if not online_service.is_current_user_token(token, current_user)]
     
     if not tokens:
         raise HTTPException(status_code=400, detail="不能批量踢出自己或无效的令牌列表")

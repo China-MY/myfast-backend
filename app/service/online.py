@@ -32,6 +32,7 @@ class OnlineService:
         
         # 遍历所有token获取用户信息
         for key in online_keys:
+            token = key.decode("utf-8").replace(ONLINE_KEY_PREFIX, "")
             user_data = redis_client.get(key)
             if not user_data:
                 continue
@@ -42,15 +43,31 @@ class OnlineService:
                 # 过滤条件
                 if ipaddr and ipaddr not in user_info.get("ipaddr", ""):
                     continue
-                if username and username not in user_info.get("username", ""):
+                if username and username not in user_info.get("user_name", "") and username not in user_info.get("username", ""):
                     continue
                 
-                online_users.append(OnlineUserOut(**user_info))
+                # 确保字段名与OnlineUserOut模型匹配
+                online_user_data = {
+                    "sessionId": token,
+                    "user_id": user_info.get("user_id"),
+                    "user_name": user_info.get("user_name") or user_info.get("username", ""),
+                    "ipaddr": user_info.get("ipaddr", ""),
+                    "login_location": user_info.get("login_location", ""),
+                    "browser": user_info.get("browser", "Unknown"),
+                    "os": user_info.get("os", "Unknown"),
+                    "status": "on_line",
+                    "start_timestamp": user_info.get("login_time"),
+                    "last_access_time": user_info.get("login_time"),
+                    "expire_time": settings.ACCESS_TOKEN_EXPIRE_MINUTES
+                }
+                
+                online_users.append(OnlineUserOut(**online_user_data))
             except Exception as e:
                 print(f"解析在线用户数据出错: {e}")
         
         # 排序和分页
-        online_users.sort(key=lambda x: x.login_time, reverse=True)
+        # 使用start_timestamp替代login_time进行排序
+        online_users.sort(key=lambda x: x.start_timestamp if x.start_timestamp else "", reverse=True)
         total = len(online_users)
         
         # 分页处理
@@ -101,18 +118,23 @@ class OnlineService:
         保存在线用户信息
         """
         location = get_location_by_ip(ip_addr)
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
-        # 构建在线用户信息
+        # 构建在线用户信息，确保字段名与OnlineUserOut模型匹配
         online_user = {
-            "token": token,
+            "sessionId": token,
             "user_id": user.user_id,
-            "username": user.username,
-            "user_name": user.nick_name or user.username,
+            "user_name": user.username,  # 使用username作为user_name
+            "username": user.username,    # 保留原有字段
             "ipaddr": ip_addr,
             "login_location": location,
             "browser": "Unknown",  # 实际应用中应从请求头获取
             "os": "Unknown",       # 实际应用中应从请求头获取
-            "login_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            "status": "on_line",
+            "start_timestamp": current_time,
+            "last_access_time": current_time,
+            "login_time": current_time,   # 保留原有字段
+            "expire_time": settings.ACCESS_TOKEN_EXPIRE_MINUTES
         }
         
         # 存储到Redis，设置过期时间与token一致

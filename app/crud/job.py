@@ -1,5 +1,6 @@
 from typing import Any, Dict, List, Optional, Union
 from sqlalchemy.orm import Session
+from fastapi.encoders import jsonable_encoder
 
 from app.crud.base import CRUDBase
 from app.models.job import SysJob, SysJobLog
@@ -16,6 +17,33 @@ class CRUDJob(CRUDBase[SysJob, JobCreate, JobUpdate]):
             self.model.job_group == job_group
         ).first()
     
+    def create_with_user(self, db: Session, *, obj_in: JobCreate, user_id: int) -> SysJob:
+        """创建任务并记录创建者"""
+        obj_in_data = jsonable_encoder(obj_in)
+        db_obj = self.model(**obj_in_data)
+        db_obj.create_by = str(user_id)
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        return db_obj
+    
+    def update_with_user(self, db: Session, *, db_obj: SysJob, obj_in: Union[JobUpdate, Dict[str, Any]], user_id: int) -> SysJob:
+        """更新任务并记录更新者"""
+        if isinstance(obj_in, dict):
+            update_data = obj_in
+        else:
+            update_data = obj_in.model_dump(exclude_unset=True)
+        
+        for field in update_data:
+            if field in update_data:
+                setattr(db_obj, field, update_data[field])
+        
+        db_obj.update_by = str(user_id)
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        return db_obj
+    
     def search_by_keyword(
         self, 
         db: Session, 
@@ -28,6 +56,7 @@ class CRUDJob(CRUDBase[SysJob, JobCreate, JobUpdate]):
         page_size: int = 10
     ) -> Dict[str, Any]:
         """搜索任务"""
+        print(f"[DEBUG] CRUDJob.search_by_keyword - 参数: keyword={keyword}, job_name={job_name}, job_group={job_group}, status={status}, page={page}, page_size={page_size}")
         query = db.query(self.model)
         
         # 搜索条件
@@ -49,9 +78,14 @@ class CRUDJob(CRUDBase[SysJob, JobCreate, JobUpdate]):
             
         # 计算总数
         total = query.count()
+        print(f"[DEBUG] CRUDJob.search_by_keyword - 数据总数: {total}")
         
         # 分页
         items = query.order_by(self.model.job_id).offset((page - 1) * page_size).limit(page_size).all()
+        print(f"[DEBUG] CRUDJob.search_by_keyword - 返回数据条数: {len(items)}, 第一条数据类型: {type(items[0]) if items else 'None'}")
+
+        if items and items[0] is not None:
+            print(f"[DEBUG] 第一条任务属性: {items[0].__dict__ if hasattr(items[0], '__dict__') else items[0]}")
         
         return {
             "total": total,
@@ -81,7 +115,8 @@ class CRUDJobLog(CRUDBase[SysJobLog, JobLogCreate, Any]):
         db: Session, 
         *, 
         job_name: str = None, 
-        job_group: str = None, 
+        job_group: str = None,
+        job_id: int = None,
         status: str = None,
         page: int = 1, 
         page_size: int = 10
@@ -95,6 +130,10 @@ class CRUDJobLog(CRUDBase[SysJobLog, JobLogCreate, Any]):
         
         if job_group:
             query = query.filter(self.model.job_group == job_group)
+            
+        # job_id字段在sys_job_log表中不存在，暂时注释掉
+        # if job_id:
+        #     query = query.filter(self.model.job_id == job_id)
             
         if status:
             query = query.filter(self.model.status == status)

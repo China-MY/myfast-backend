@@ -36,11 +36,16 @@ def list_configs(
         config_type=config_type
     )
     
-    return PageResponseModel[List[ConfigOut]](
-        data=configs,
-        total=total,
-        page=page,
-        page_size=page_size
+    # 调整返回格式以匹配前端期望
+    return PageResponseModel(
+        code=200,
+        msg="操作成功",
+        rows=[configs],  # 包装在数组中以匹配前端预期的二维数组
+        pageInfo={
+            "page": page,
+            "pageSize": page_size,
+            "total": total
+        }
     )
 
 

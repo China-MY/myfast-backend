@@ -4,16 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="34fb14a6-8548-4aa8-8f03-de99e814f2f0" name="更改" comment="20250611-完善定时任务">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/deps.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/deps.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/v1/auth/login.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/auth/login.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/v1/auth/logout.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/auth/logout.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/v1/monitor/online.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/monitor/online.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/core/security.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/core/security.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/schemas/token.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/token.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/service/online.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/service/online.py" afterDir="false" />
-    </list>
+    <list default="true" id="34fb14a6-8548-4aa8-8f03-de99e814f2f0" name="更改" comment="20250611-修复在线用户" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -107,7 +98,7 @@
       <workItem from="1749534698025" duration="11660000" />
       <workItem from="1749604159535" duration="10000" />
       <workItem from="1749608187894" duration="3562000" />
-      <workItem from="1749619893728" duration="8760000" />
+      <workItem from="1749619893728" duration="9496000" />
     </task>
     <task id="LOCAL-00001" summary="20250610-完善岗位管理">
       <option name="closed" value="true" />
@@ -189,7 +180,15 @@
       <option name="project" value="LOCAL" />
       <updated>1749628882274</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="20250611-修复在线用户">
+      <option name="closed" value="true" />
+      <created>1749634047081</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1749634047081</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -206,7 +205,8 @@
     <MESSAGE value="20250610-描述文件3.3" />
     <MESSAGE value="20250611-完善参数设置" />
     <MESSAGE value="20250611-完善定时任务" />
-    <option name="LAST_COMMIT_MESSAGE" value="20250611-完善定时任务" />
+    <MESSAGE value="20250611-修复在线用户" />
+    <option name="LAST_COMMIT_MESSAGE" value="20250611-修复在线用户" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/myfast_backend$main.coverage" NAME="main 覆盖结果" MODIFIED="1749630771604" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />

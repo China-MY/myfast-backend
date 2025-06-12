@@ -1,0 +1,15 @@
+from typing import Optional
+from datetime import datetime
+from sqlalchemy import Column, String, Integer, DateTime, Boolean, Float, Text, ForeignKey
+from sqlalchemy.orm import relationship
+from app.db.base_class import Base
+
+class {{ table.class_name }}(Base):
+    """
+    {{ table.table_comment or table.class_name }}
+    """
+    __tablename__ = "{{ table.table_name }}"
+    
+    {% for column in columns %}
+    {{ column.field_name }} = Column({{ column.python_type | default('String') }}{% if column.column_type and column.column_type.startswith('varchar') %}({{ column.column_type.replace('varchar(', '').replace(')', '') }}){% endif %}, {% if column.is_pk == '1' %}primary_key=True, {% endif %}{% if column.is_increment == '1' %}autoincrement=True, {% endif %}{% if column.is_required == '1' %}nullable=False, {% endif %}comment="{{ column.column_comment }}")
+    {% endfor %} 

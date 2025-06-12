@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from app.api.v1.auth import login, register, logout
 from app.api.v1.system import user, profile, role, menu, dept, post, dict, config
 from app.api.v1.monitor import online, server, job
+from app.api.v1.tool import gen
 
 # 创建API路由器
 api_router = APIRouter()
@@ -26,3 +27,6 @@ api_router.include_router(config.router, prefix="/system/config", tags=["参数�
 api_router.include_router(online.router, prefix="/monitor/online", tags=["在线用户"])
 api_router.include_router(server.router, prefix="/monitor/server", tags=["服务器监控"])
 api_router.include_router(job.router, prefix="/monitor/job", tags=["定时任务"])
+
+# 代码生成工具路由
+api_router.include_router(gen.router, prefix="/tool/gen", tags=["代码生成"])

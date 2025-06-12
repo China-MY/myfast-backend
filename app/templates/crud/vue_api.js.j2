@@ -1,0 +1,53 @@
+import request from '@/request'
+
+// 查询{{ table.table_comment or table.class_name }}列表
+export function list{{ table.class_name }}(query) {
+  return request({
+    url: '/{{ table.module_name }}/{{ table.business_name }}/list',
+    method: 'get',
+    params: query
+  })
+}
+
+// 查询{{ table.table_comment or table.class_name }}详细
+export function get{{ table.class_name }}(id) {
+  return request({
+    url: '/{{ table.module_name }}/{{ table.business_name }}/' + id,
+    method: 'get'
+  })
+}
+
+// 新增{{ table.table_comment or table.class_name }}
+export function add{{ table.class_name }}(data) {
+  return request({
+    url: '/{{ table.module_name }}/{{ table.business_name }}',
+    method: 'post',
+    data: data
+  })
+}
+
+// 修改{{ table.table_comment or table.class_name }}
+export function update{{ table.class_name }}(id, data) {
+  return request({
+    url: '/{{ table.module_name }}/{{ table.business_name }}/' + id,
+    method: 'put',
+    data: data
+  })
+}
+
+// 删除{{ table.table_comment or table.class_name }}
+export function del{{ table.class_name }}(id) {
+  return request({
+    url: '/{{ table.module_name }}/{{ table.business_name }}/' + id,
+    method: 'delete'
+  })
+}
+
+// 导出{{ table.table_comment or table.class_name }}
+export function export{{ table.class_name }}(query) {
+  return request({
+    url: '/{{ table.module_name }}/{{ table.business_name }}/export',
+    method: 'get',
+    params: query
+  })
+} 

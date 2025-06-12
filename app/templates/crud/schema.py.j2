@@ -1,0 +1,41 @@
+from typing import Optional, List
+from datetime import datetime
+from pydantic import BaseModel, Field
+
+# 基础模型
+class {{ table.class_name }}Base(BaseModel):
+    {% for column in columns %}
+    {% if column.is_pk != '1' and column.field_name != 'create_time' and column.field_name != 'update_time' %}
+    {{ column.field_name }}: {% if column.is_required != '1' %}Optional[{% endif %}{{ column.python_type | default('str') }}{% if column.is_required != '1' %}]{% endif %} = {% if column.is_required != '1' %}None{% else %}Field(...){% endif %}{% if column.column_comment %} # {{ column.column_comment }}{% endif %}
+    {% endif %}
+    {% endfor %}
+
+# 创建模型
+class {{ table.class_name }}Create({{ table.class_name }}Base):
+    pass
+
+# 更新模型
+class {{ table.class_name }}Update({{ table.class_name }}Base):
+    pass
+
+# 数据库模型
+class {{ table.class_name }}InDB({{ table.class_name }}Base):
+    id: int
+    {% for column in columns %}
+    {% if column.field_name == 'create_time' or column.field_name == 'update_time' %}
+    {{ column.field_name }}: Optional[datetime] = None
+    {% endif %}
+    {% endfor %}
+
+    class Config:
+        orm_mode = True
+
+# 查询参数模型
+class {{ table.class_name }}QueryParams(BaseModel):
+    {% for column in columns %}
+    {% if column.query_type and column.query_type != 'NONE' %}
+    {{ column.field_name }}: Optional[{{ column.python_type | default('str') }}] = None
+    {% endif %}
+    {% endfor %}
+    page_num: int = 1
+    page_size: int = 10 

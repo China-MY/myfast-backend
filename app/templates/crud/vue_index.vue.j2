@@ -1,0 +1,361 @@
+<template>
+  <div class="app-container">
+    <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch">
+      {% for column in columns %}
+      {% if column.query_type and column.query_type != 'NONE' %}
+      <el-form-item label="{{ column.column_comment }}" prop="{{ column.field_name }}">
+        {% if column.query_type == 'BETWEEN' %}
+        <el-date-picker
+          v-model="dateRange{{ column.field_name | capitalize }}"
+          style="width: 240px"
+          value-format="yyyy-MM-dd"
+          type="daterange"
+          range-separator="-"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+        ></el-date-picker>
+        {% elif column.html_type == 'select' %}
+        <el-select v-model="queryParams.{{ column.field_name }}" placeholder="请选择" clearable>
+          <el-option
+            v-for="dict in {{ column.dict_type }}"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+        {% elif column.html_type == 'radio' %}
+        <el-radio-group v-model="queryParams.{{ column.field_name }}">
+          <el-radio
+            v-for="dict in {{ column.dict_type }}"
+            :key="dict.value"
+            :label="dict.value"
+          >{{'{{'}} dict.label {{'}}'}}</el-radio>
+        </el-radio-group>
+        {% else %}
+        <el-input
+          v-model="queryParams.{{ column.field_name }}"
+          placeholder="请输入{{ column.column_comment }}"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+        {% endif %}
+      </el-form-item>
+      {% endif %}
+      {% endfor %}
+      <el-form-item>
+        <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh" @click="resetQuery">重置</el-button>
+      </el-form-item>
+    </el-form>
+
+    <el-row :gutter="10" class="mb8">
+      <el-col :span="1.5">
+        <el-button
+          type="primary"
+          plain
+          icon="el-icon-plus"
+          @click="handleAdd"
+        >新增</el-button>
+      </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="success"
+          plain
+          icon="el-icon-edit"
+          :disabled="single"
+          @click="handleUpdate"
+        >修改</el-button>
+      </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="danger"
+          plain
+          icon="el-icon-delete"
+          :disabled="multiple"
+          @click="handleDelete"
+        >删除</el-button>
+      </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="warning"
+          plain
+          icon="el-icon-download"
+          @click="handleExport"
+        >导出</el-button>
+      </el-col>
+      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
+    </el-row>
+
+    <el-table v-loading="loading" :data="tableList" @selection-change="handleSelectionChange">
+      <el-table-column type="selection" width="55" align="center" />
+      {% for column in columns %}
+      {% if column.is_list == '1' %}
+      <el-table-column label="{{ column.column_comment }}" align="center" prop="{{ column.field_name }}" {% if column.is_sort == '1' %}sortable{% endif %}>
+        {% if column.html_type == 'select' or column.html_type == 'radio' %}
+        <template slot-scope="scope">
+          {% if column.dict_type %}
+          <dict-tag :options="{{ column.dict_type }}" :value="scope.row.{{ column.field_name }}" />
+          {% else %}
+          {{'{{'}} scope.row.{{ column.field_name }} {{'}}'}}
+          {% endif %}
+        </template>
+        {% endif %}
+      </el-table-column>
+      {% endif %}
+      {% endfor %}
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+        <template slot-scope="scope">
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-edit"
+            @click="handleUpdate(scope.row)"
+          >修改</el-button>
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-delete"
+            @click="handleDelete(scope.row)"
+          >删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    
+    <pagination
+      v-show="total>0"
+      :total="total"
+      :page.sync="queryParams.page_num"
+      :limit.sync="queryParams.page_size"
+      @pagination="getList"
+    />
+
+    <!-- 添加或修改对话框 -->
+    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
+      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+        {% for column in columns %}
+        {% if column.is_edit == '1' and column.field_name != 'id' and column.field_name != 'create_time' and column.field_name != 'update_time' %}
+        <el-form-item label="{{ column.column_comment }}" prop="{{ column.field_name }}">
+          {% if column.html_type == 'input' %}
+          <el-input v-model="form.{{ column.field_name }}" placeholder="请输入{{ column.column_comment }}" />
+          {% elif column.html_type == 'textarea' %}
+          <el-input v-model="form.{{ column.field_name }}" type="textarea" placeholder="请输入内容" />
+          {% elif column.html_type == 'select' %}
+          <el-select v-model="form.{{ column.field_name }}" placeholder="请选择">
+            {% if column.dict_type %}
+            <el-option
+              v-for="dict in {{ column.dict_type }}"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            ></el-option>
+            {% endif %}
+          </el-select>
+          {% elif column.html_type == 'radio' %}
+          <el-radio-group v-model="form.{{ column.field_name }}">
+            {% if column.dict_type %}
+            <el-radio
+              v-for="dict in {{ column.dict_type }}"
+              :key="dict.value"
+              :label="dict.value"
+            >{{'{{'}} dict.label {{'}}'}}</el-radio>
+            {% endif %}
+          </el-radio-group>
+          {% elif column.html_type == 'datetime' %}
+          <el-date-picker clearable
+            v-model="form.{{ column.field_name }}"
+            type="datetime"
+            value-format="yyyy-MM-dd HH:mm:ss"
+            placeholder="请选择时间">
+          </el-date-picker>
+          {% elif column.html_type == 'switch' %}
+          <el-switch v-model="form.{{ column.field_name }}"></el-switch>
+          {% endif %}
+        </el-form-item>
+        {% endif %}
+        {% endfor %}
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="cancel">取 消</el-button>
+        <el-button type="primary" @click="submitForm">确 定</el-button>
+      </div>
+    </el-dialog>
+  </div>
+</template>
+
+<script>
+import { 
+  list{{ table.class_name }}, 
+  get{{ table.class_name }}, 
+  del{{ table.class_name }}, 
+  add{{ table.class_name }}, 
+  update{{ table.class_name }}, 
+  export{{ table.class_name }}
+} from "@/api/{{ table.module_name }}/{{ table.business_name }}";
+
+export default {
+  name: "{{ table.class_name }}",
+  data() {
+    return {
+      // 遮罩层
+      loading: true,
+      // 选中数组
+      ids: [],
+      // 非单个禁用
+      single: true,
+      // 非多个禁用
+      multiple: true,
+      // 显示搜索条件
+      showSearch: true,
+      // 总条数
+      total: 0,
+      // 表格数据
+      tableList: [],
+      // 弹出层标题
+      title: "",
+      // 是否显示弹出层
+      open: false,
+      {% for column in columns %}
+      {% if column.query_type == 'BETWEEN' %}
+      // {{ column.column_comment }}时间范围
+      dateRange{{ column.field_name | capitalize }}: [],
+      {% endif %}
+      {% endfor %}
+      // 查询参数
+      queryParams: {
+        page_num: 1,
+        page_size: 10,
+        {% for column in columns %}
+        {% if column.query_type and column.query_type != 'NONE' %}
+        {{ column.field_name }}: undefined,
+        {% endif %}
+        {% endfor %}
+      },
+      // 表单参数
+      form: {},
+      // 表单校验
+      rules: {
+        {% for column in columns %}
+        {% if column.is_required == '1' and column.is_edit == '1' and column.field_name != 'id' and column.field_name != 'create_time' and column.field_name != 'update_time' %}
+        {{ column.field_name }}: [
+          { required: true, message: "{{ column.column_comment }}不能为空", trigger: "blur" }
+        ],
+        {% endif %}
+        {% endfor %}
+      }
+    };
+  },
+  created() {
+    this.getList();
+  },
+  methods: {
+    /** 查询列表 */
+    getList() {
+      this.loading = true;
+      {% for column in columns %}
+      {% if column.query_type == 'BETWEEN' %}
+      this.queryParams.{{ column.field_name }}_begin = this.dateRange{{ column.field_name | capitalize }}[0];
+      this.queryParams.{{ column.field_name }}_end = this.dateRange{{ column.field_name | capitalize }}[1];
+      {% endif %}
+      {% endfor %}
+      list{{ table.class_name }}(this.queryParams).then(response => {
+        this.tableList = response.data;
+        this.total = response.total;
+        this.loading = false;
+      });
+    },
+    // 取消按钮
+    cancel() {
+      this.open = false;
+      this.reset();
+    },
+    // 表单重置
+    reset() {
+      this.form = {
+        {% for column in columns %}
+        {% if column.is_edit == '1' and column.field_name != 'id' and column.field_name != 'create_time' and column.field_name != 'update_time' %}
+        {{ column.field_name }}: undefined,
+        {% endif %}
+        {% endfor %}
+      };
+      this.resetForm("form");
+    },
+    /** 搜索按钮操作 */
+    handleQuery() {
+      this.queryParams.page_num = 1;
+      this.getList();
+    },
+    /** 重置按钮操作 */
+    resetQuery() {
+      {% for column in columns %}
+      {% if column.query_type == 'BETWEEN' %}
+      this.dateRange{{ column.field_name | capitalize }} = [];
+      {% endif %}
+      {% endfor %}
+      this.resetForm("queryForm");
+      this.handleQuery();
+    },
+    // 多选框选中数据
+    handleSelectionChange(selection) {
+      this.ids = selection.map(item => item.id)
+      this.single = selection.length!==1
+      this.multiple = !selection.length
+    },
+    /** 新增按钮操作 */
+    handleAdd() {
+      this.reset();
+      this.open = true;
+      this.title = "添加{{ table.table_comment or table.class_name }}";
+    },
+    /** 修改按钮操作 */
+    handleUpdate(row) {
+      this.reset();
+      const id = row.id || this.ids[0]
+      get{{ table.class_name }}(id).then(response => {
+        this.form = response.data;
+        this.open = true;
+        this.title = "修改{{ table.table_comment or table.class_name }}";
+      });
+    },
+    /** 提交按钮 */
+    submitForm() {
+      this.$refs["form"].validate(valid => {
+        if (valid) {
+          if (this.form.id) {
+            update{{ table.class_name }}(this.form.id, this.form).then(response => {
+              this.$modal.msgSuccess("修改成功");
+              this.open = false;
+              this.getList();
+            });
+          } else {
+            add{{ table.class_name }}(this.form).then(response => {
+              this.$modal.msgSuccess("新增成功");
+              this.open = false;
+              this.getList();
+            });
+          }
+        }
+      });
+    },
+    /** 删除按钮操作 */
+    handleDelete(row) {
+      const ids = row.id || this.ids;
+      this.$modal.confirm('是否确认删除{{ table.table_comment or table.class_name }}编号为"' + ids + '"的数据项？').then(function() {
+        return del{{ table.class_name }}(ids);
+      }).then(() => {
+        this.getList();
+        this.$modal.msgSuccess("删除成功");
+      }).catch(() => {});
+    },
+    /** 导出按钮操作 */
+    handleExport() {
+      this.$modal.confirm('是否确认导出所有{{ table.table_comment or table.class_name }}数据项？').then(() => {
+        this.exportLoading = true;
+        return export{{ table.class_name }}(this.queryParams);
+      }).then(response => {
+        this.$download.download(response);
+        this.exportLoading = false;
+      }).catch(() => {});
+    }
+  }
+};
+</script> 

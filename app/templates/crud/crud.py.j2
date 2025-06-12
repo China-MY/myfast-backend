@@ -1,0 +1,162 @@
+from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
+from fastapi.encoders import jsonable_encoder
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+from sqlalchemy import func
+
+from app.db.base_class import Base
+from app.models.{{ table.module_name }}.{{ table.business_name }} import {{ table.class_name }}
+from app.schemas.{{ table.module_name }}.{{ table.business_name }} import {{ table.class_name }}Create, {{ table.class_name }}Update, {{ table.class_name }}QueryParams
+
+ModelType = TypeVar("ModelType", bound=Base)
+CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
+UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
+
+class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
+    def __init__(self, model: Type[ModelType]):
+        """
+        CRUD 基类，提供默认的 CRUD 操作
+        """
+        self.model = model
+
+    def get(self, db: Session, id: Any) -> Optional[ModelType]:
+        """
+        通过ID获取对象
+        """
+        return db.query(self.model).filter(self.model.id == id).first()
+
+    def get_multi(
+        self, db: Session, *, skip: int = 0, limit: int = 100
+    ) -> List[ModelType]:
+        """
+        获取多个对象
+        """
+        return db.query(self.model).offset(skip).limit(limit).all()
+
+    def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:
+        """
+        创建对象
+        """
+        obj_in_data = jsonable_encoder(obj_in)
+        db_obj = self.model(**obj_in_data)
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        return db_obj
+
+    def update(
+        self,
+        db: Session,
+        *,
+        db_obj: ModelType,
+        obj_in: Union[UpdateSchemaType, Dict[str, Any]]
+    ) -> ModelType:
+        """
+        更新对象
+        """
+        obj_data = jsonable_encoder(db_obj)
+        if isinstance(obj_in, dict):
+            update_data = obj_in
+        else:
+            update_data = obj_in.dict(exclude_unset=True)
+        for field in obj_data:
+            if field in update_data:
+                setattr(db_obj, field, update_data[field])
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        return db_obj
+
+    def remove(self, db: Session, *, id: int) -> ModelType:
+        """
+        删除对象
+        """
+        obj = db.query(self.model).get(id)
+        db.delete(obj)
+        db.commit()
+        return obj
+
+class CRUD{{ table.class_name }}(CRUDBase[{{ table.class_name }}, {{ table.class_name }}Create, {{ table.class_name }}Update]):
+    """
+    {{ table.table_comment or table.class_name }} 的 CRUD 操作
+    """
+    
+    def get_list(self, db: Session, *, query: {{ table.class_name }}QueryParams) -> List[{{ table.class_name }}]:
+        """
+        获取列表
+        """
+        q = db.query(self.model)
+        
+        # 应用查询条件
+        {% for column in columns %}
+        {% if column.query_type == 'EQ' %}
+        if query.{{ column.field_name }} is not None:
+            q = q.filter(self.model.{{ column.field_name }} == query.{{ column.field_name }})
+        {% elif column.query_type == 'NE' %}
+        if query.{{ column.field_name }} is not None:
+            q = q.filter(self.model.{{ column.field_name }} != query.{{ column.field_name }})
+        {% elif column.query_type == 'GT' %}
+        if query.{{ column.field_name }} is not None:
+            q = q.filter(self.model.{{ column.field_name }} > query.{{ column.field_name }})
+        {% elif column.query_type == 'GTE' %}
+        if query.{{ column.field_name }} is not None:
+            q = q.filter(self.model.{{ column.field_name }} >= query.{{ column.field_name }})
+        {% elif column.query_type == 'LT' %}
+        if query.{{ column.field_name }} is not None:
+            q = q.filter(self.model.{{ column.field_name }} < query.{{ column.field_name }})
+        {% elif column.query_type == 'LTE' %}
+        if query.{{ column.field_name }} is not None:
+            q = q.filter(self.model.{{ column.field_name }} <= query.{{ column.field_name }})
+        {% elif column.query_type == 'LIKE' %}
+        if query.{{ column.field_name }} is not None:
+            q = q.filter(self.model.{{ column.field_name }}.like(f"%{query.{{ column.field_name }}}%"))
+        {% elif column.query_type == 'BETWEEN' %}
+        if query.{{ column.field_name }}_begin is not None and query.{{ column.field_name }}_end is not None:
+            q = q.filter(self.model.{{ column.field_name }}.between(query.{{ column.field_name }}_begin, query.{{ column.field_name }}_end))
+        {% endif %}
+        {% endfor %}
+        
+        # 应用分页
+        skip = (query.page_num - 1) * query.page_size
+        q = q.offset(skip).limit(query.page_size)
+        
+        return q.all()
+    
+    def get_count(self, db: Session, *, query: {{ table.class_name }}QueryParams) -> int:
+        """
+        获取总数
+        """
+        q = db.query(func.count(self.model.id))
+        
+        # 应用查询条件
+        {% for column in columns %}
+        {% if column.query_type == 'EQ' %}
+        if query.{{ column.field_name }} is not None:
+            q = q.filter(self.model.{{ column.field_name }} == query.{{ column.field_name }})
+        {% elif column.query_type == 'NE' %}
+        if query.{{ column.field_name }} is not None:
+            q = q.filter(self.model.{{ column.field_name }} != query.{{ column.field_name }})
+        {% elif column.query_type == 'GT' %}
+        if query.{{ column.field_name }} is not None:
+            q = q.filter(self.model.{{ column.field_name }} > query.{{ column.field_name }})
+        {% elif column.query_type == 'GTE' %}
+        if query.{{ column.field_name }} is not None:
+            q = q.filter(self.model.{{ column.field_name }} >= query.{{ column.field_name }})
+        {% elif column.query_type == 'LT' %}
+        if query.{{ column.field_name }} is not None:
+            q = q.filter(self.model.{{ column.field_name }} < query.{{ column.field_name }})
+        {% elif column.query_type == 'LTE' %}
+        if query.{{ column.field_name }} is not None:
+            q = q.filter(self.model.{{ column.field_name }} <= query.{{ column.field_name }})
+        {% elif column.query_type == 'LIKE' %}
+        if query.{{ column.field_name }} is not None:
+            q = q.filter(self.model.{{ column.field_name }}.like(f"%{query.{{ column.field_name }}}%"))
+        {% elif column.query_type == 'BETWEEN' %}
+        if query.{{ column.field_name }}_begin is not None and query.{{ column.field_name }}_end is not None:
+            q = q.filter(self.model.{{ column.field_name }}.between(query.{{ column.field_name }}_begin, query.{{ column.field_name }}_end))
+        {% endif %}
+        {% endfor %}
+        
+        return q.scalar() or 0
+
+{{ table.business_name }} = CRUD{{ table.class_name }}({{ table.class_name }}) 

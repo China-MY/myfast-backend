@@ -2,9 +2,35 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
+import logging
+from contextlib import asynccontextmanager
 
 from app.api.v1.api import api_router
 from app.core.config import settings
+from app.db.session import engine
+from app.models.tool.gen import GenTable, GenTableColumn
+
+# 配置日志
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# 定义lifespan上下文管理器来处理启动和关闭事件
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # 启动事件：在应用启动时执行
+    try:
+        # 创建代码生成相关表
+        logger.info("检查并创建代码生成表结构...")
+        GenTable.__table__.create(engine, checkfirst=True)
+        GenTableColumn.__table__.create(engine, checkfirst=True)
+        logger.info("代码生成表结构检查完成")
+    except Exception as e:
+        logger.error(f"创建代码生成表结构失败: {e}")
+    
+    yield  # 这里会暂停，直到应用关闭
+    
+    # 关闭事件：在应用关闭时执行
+    logger.info("应用正在关闭...")
 
 # 创建FastAPI应用
 app = FastAPI(
@@ -14,6 +40,7 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     docs_url="/docs",
     redoc_url="/redoc",
+    lifespan=lifespan,  # 使用定义的lifespan上下文管理器
 )
 
 # 配置CORS

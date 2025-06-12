@@ -1,0 +1,198 @@
+from typing import Any, List, Optional
+from fastapi import APIRouter, Depends, HTTPException, Query, Path, Body
+from sqlalchemy.orm import Session
+from datetime import datetime
+
+from app.api import deps
+from app.crud.{{ table.module_name }}.{{ table.business_name }} import {{ table.business_name }}
+from app.schemas.{{ table.module_name }}.{{ table.business_name }} import (
+    {{ table.class_name }}Create, 
+    {{ table.class_name }}Update, 
+    {{ table.class_name }}InDB,
+    {{ table.class_name }}QueryParams
+)
+
+router = APIRouter()
+
+
+@router.get("/list", response_model=List[{{ table.class_name }}InDB])
+def get_list(
+    db: Session = Depends(deps.get_db),
+    {% for column in columns %}
+    {% if column.query_type == 'EQ' %}
+    {{ column.field_name }}: Optional[{{ column.python_type | default('str') }}] = None,
+    {% elif column.query_type == 'NE' %}
+    {{ column.field_name }}: Optional[{{ column.python_type | default('str') }}] = None,
+    {% elif column.query_type == 'GT' %}
+    {{ column.field_name }}: Optional[{{ column.python_type | default('str') }}] = None,
+    {% elif column.query_type == 'GTE' %}
+    {{ column.field_name }}: Optional[{{ column.python_type | default('str') }}] = None,
+    {% elif column.query_type == 'LT' %}
+    {{ column.field_name }}: Optional[{{ column.python_type | default('str') }}] = None,
+    {% elif column.query_type == 'LTE' %}
+    {{ column.field_name }}: Optional[{{ column.python_type | default('str') }}] = None,
+    {% elif column.query_type == 'LIKE' %}
+    {{ column.field_name }}: Optional[{{ column.python_type | default('str') }}] = None,
+    {% elif column.query_type == 'BETWEEN' %}
+    {{ column.field_name }}_begin: Optional[{{ column.python_type | default('str') }}] = None,
+    {{ column.field_name }}_end: Optional[{{ column.python_type | default('str') }}] = None,
+    {% endif %}
+    {% endfor %}
+    page_num: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=100),
+) -> Any:
+    """
+    获取{{ table.table_comment or table.class_name }}列表
+    """
+    query = {{ table.class_name }}QueryParams(
+        {% for column in columns %}
+        {% if column.query_type == 'EQ' %}
+        {{ column.field_name }}={{ column.field_name }},
+        {% elif column.query_type == 'NE' %}
+        {{ column.field_name }}={{ column.field_name }},
+        {% elif column.query_type == 'GT' %}
+        {{ column.field_name }}={{ column.field_name }},
+        {% elif column.query_type == 'GTE' %}
+        {{ column.field_name }}={{ column.field_name }},
+        {% elif column.query_type == 'LT' %}
+        {{ column.field_name }}={{ column.field_name }},
+        {% elif column.query_type == 'LTE' %}
+        {{ column.field_name }}={{ column.field_name }},
+        {% elif column.query_type == 'LIKE' %}
+        {{ column.field_name }}={{ column.field_name }},
+        {% elif column.query_type == 'BETWEEN' %}
+        {{ column.field_name }}_begin={{ column.field_name }}_begin,
+        {{ column.field_name }}_end={{ column.field_name }}_end,
+        {% endif %}
+        {% endfor %}
+        page_num=page_num,
+        page_size=page_size
+    )
+    return {{ table.business_name }}.get_list(db, query=query)
+
+
+@router.get("/total", response_model=int)
+def get_total(
+    db: Session = Depends(deps.get_db),
+    {% for column in columns %}
+    {% if column.query_type == 'EQ' %}
+    {{ column.field_name }}: Optional[{{ column.python_type | default('str') }}] = None,
+    {% elif column.query_type == 'NE' %}
+    {{ column.field_name }}: Optional[{{ column.python_type | default('str') }}] = None,
+    {% elif column.query_type == 'GT' %}
+    {{ column.field_name }}: Optional[{{ column.python_type | default('str') }}] = None,
+    {% elif column.query_type == 'GTE' %}
+    {{ column.field_name }}: Optional[{{ column.python_type | default('str') }}] = None,
+    {% elif column.query_type == 'LT' %}
+    {{ column.field_name }}: Optional[{{ column.python_type | default('str') }}] = None,
+    {% elif column.query_type == 'LTE' %}
+    {{ column.field_name }}: Optional[{{ column.python_type | default('str') }}] = None,
+    {% elif column.query_type == 'LIKE' %}
+    {{ column.field_name }}: Optional[{{ column.python_type | default('str') }}] = None,
+    {% elif column.query_type == 'BETWEEN' %}
+    {{ column.field_name }}_begin: Optional[{{ column.python_type | default('str') }}] = None,
+    {{ column.field_name }}_end: Optional[{{ column.python_type | default('str') }}] = None,
+    {% endif %}
+    {% endfor %}
+) -> Any:
+    """
+    获取{{ table.table_comment or table.class_name }}总数
+    """
+    query = {{ table.class_name }}QueryParams(
+        {% for column in columns %}
+        {% if column.query_type == 'EQ' %}
+        {{ column.field_name }}={{ column.field_name }},
+        {% elif column.query_type == 'NE' %}
+        {{ column.field_name }}={{ column.field_name }},
+        {% elif column.query_type == 'GT' %}
+        {{ column.field_name }}={{ column.field_name }},
+        {% elif column.query_type == 'GTE' %}
+        {{ column.field_name }}={{ column.field_name }},
+        {% elif column.query_type == 'LT' %}
+        {{ column.field_name }}={{ column.field_name }},
+        {% elif column.query_type == 'LTE' %}
+        {{ column.field_name }}={{ column.field_name }},
+        {% elif column.query_type == 'LIKE' %}
+        {{ column.field_name }}={{ column.field_name }},
+        {% elif column.query_type == 'BETWEEN' %}
+        {{ column.field_name }}_begin={{ column.field_name }}_begin,
+        {{ column.field_name }}_end={{ column.field_name }}_end,
+        {% endif %}
+        {% endfor %}
+    )
+    return {{ table.business_name }}.get_count(db, query=query)
+
+
+@router.get("/{id}", response_model={{ table.class_name }}InDB)
+def get_by_id(
+    *,
+    db: Session = Depends(deps.get_db),
+    id: int = Path(..., gt=0),
+) -> Any:
+    """
+    通过ID获取{{ table.table_comment or table.class_name }}
+    """
+    item = {{ table.business_name }}.get(db, id)
+    if not item:
+        raise HTTPException(status_code=404, detail="{{ table.table_comment or table.class_name }}不存在")
+    return item
+
+
+@router.post("", response_model={{ table.class_name }}InDB)
+def create(
+    *,
+    db: Session = Depends(deps.get_db),
+    item_in: {{ table.class_name }}Create,
+) -> Any:
+    """
+    创建{{ table.table_comment or table.class_name }}
+    """
+    return {{ table.business_name }}.create(db, obj_in=item_in)
+
+
+@router.put("/{id}", response_model={{ table.class_name }}InDB)
+def update(
+    *,
+    db: Session = Depends(deps.get_db),
+    id: int = Path(..., gt=0),
+    item_in: {{ table.class_name }}Update,
+) -> Any:
+    """
+    更新{{ table.table_comment or table.class_name }}
+    """
+    item = {{ table.business_name }}.get(db, id)
+    if not item:
+        raise HTTPException(status_code=404, detail="{{ table.table_comment or table.class_name }}不存在")
+    return {{ table.business_name }}.update(db, db_obj=item, obj_in=item_in)
+
+
+@router.delete("/{id}", response_model={{ table.class_name }}InDB)
+def delete(
+    *,
+    db: Session = Depends(deps.get_db),
+    id: int = Path(..., gt=0),
+) -> Any:
+    """
+    删除{{ table.table_comment or table.class_name }}
+    """
+    item = {{ table.business_name }}.get(db, id)
+    if not item:
+        raise HTTPException(status_code=404, detail="{{ table.table_comment or table.class_name }}不存在")
+    return {{ table.business_name }}.remove(db, id=id)
+
+
+@router.delete("/batch", response_model=List[{{ table.class_name }}InDB])
+def batch_delete(
+    *,
+    db: Session = Depends(deps.get_db),
+    ids: List[int] = Body(..., embed=True),
+) -> Any:
+    """
+    批量删除{{ table.table_comment or table.class_name }}
+    """
+    result = []
+    for id in ids:
+        item = {{ table.business_name }}.get(db, id)
+        if item:
+            result.append({{ table.business_name }}.remove(db, id=id))
+    return result 

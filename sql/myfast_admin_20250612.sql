@@ -16,6 +16,85 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `gen_table`
+--
+
+DROP TABLE IF EXISTS `gen_table`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `gen_table` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `table_name` varchar(200) NOT NULL COMMENT '表名称',
+  `table_comment` varchar(500) DEFAULT NULL COMMENT '表描述',
+  `class_name` varchar(100) DEFAULT NULL COMMENT '类名称',
+  `package_name` varchar(100) DEFAULT NULL COMMENT '生成包路径',
+  `module_name` varchar(30) DEFAULT NULL COMMENT '生成模块名',
+  `business_name` varchar(30) DEFAULT NULL COMMENT '生成业务名',
+  `function_name` varchar(50) DEFAULT NULL COMMENT '生成功能名',
+  `function_author` varchar(50) DEFAULT NULL COMMENT '生成功能作者',
+  `tpl_category` varchar(20) DEFAULT NULL COMMENT '使用的模板（crud单表操作 tree树表操作）',
+  `options` varchar(1000) DEFAULT NULL COMMENT '其它生成选项',
+  `remark` varchar(500) DEFAULT NULL COMMENT '备注',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `ix_gen_table_id` (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `gen_table`
+--
+
+LOCK TABLES `gen_table` WRITE;
+/*!40000 ALTER TABLE `gen_table` DISABLE KEYS */;
+/*!40000 ALTER TABLE `gen_table` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `gen_table_column`
+--
+
+DROP TABLE IF EXISTS `gen_table_column`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+ SET character_set_client = utf8mb4 ;
+CREATE TABLE `gen_table_column` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `table_id` int(11) NOT NULL COMMENT '归属表编号',
+  `column_name` varchar(200) NOT NULL COMMENT '列名称',
+  `column_comment` varchar(500) DEFAULT NULL COMMENT '列描述',
+  `column_type` varchar(100) DEFAULT NULL COMMENT '列类型',
+  `python_type` varchar(500) DEFAULT NULL COMMENT 'Python类型',
+  `field_name` varchar(200) DEFAULT NULL COMMENT '字段名',
+  `is_pk` varchar(1) DEFAULT NULL COMMENT '是否主键（1是）',
+  `is_increment` varchar(1) DEFAULT NULL COMMENT '是否自增（1是）',
+  `is_required` varchar(1) DEFAULT NULL COMMENT '是否必填（1是）',
+  `is_insert` varchar(1) DEFAULT NULL COMMENT '是否为插入字段（1是）',
+  `is_edit` varchar(1) DEFAULT NULL COMMENT '是否编辑字段（1是）',
+  `is_list` varchar(1) DEFAULT NULL COMMENT '是否列表字段（1是）',
+  `is_query` varchar(1) DEFAULT NULL COMMENT '是否查询字段（1是）',
+  `query_type` varchar(200) DEFAULT NULL COMMENT '查询方式（等于、不等于、大于、小于、范围）',
+  `html_type` varchar(200) DEFAULT NULL COMMENT '显示类型（文本框、文本域、下拉框、复选框、单选框、日期控件）',
+  `dict_type` varchar(200) DEFAULT NULL COMMENT '字典类型',
+  `sort` int(11) DEFAULT NULL COMMENT '排序',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `table_id` (`table_id`),
+  KEY `ix_gen_table_column_id` (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `gen_table_column`
+--
+
+LOCK TABLES `gen_table_column` WRITE;
+/*!40000 ALTER TABLE `gen_table_column` DISABLE KEYS */;
+/*!40000 ALTER TABLE `gen_table_column` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `sys_config`
 --
 
@@ -475,7 +554,7 @@ CREATE TABLE `sys_user` (
 
 LOCK TABLES `sys_user` WRITE;
 /*!40000 ALTER TABLE `sys_user` DISABLE KEYS */;
-INSERT INTO `sys_user` VALUES (1,100,'admin','管理员','00','admin@example.com','15888888888','0','','$2b$12$XnQlPiuCm7aWh6F3cmFZy.dnDvU0njB.70dNoVmsp14DAe4UCX7V2','0','0','127.0.0.1','2025-06-11 16:22:22','admin','2025-06-03 10:45:00','','2025-06-11 16:22:22','管理员'),(100,100,'myxzadmin','管理员','00','myxz@example.com','13800138000','0','','$2b$12$7lVHEKsRgIiD1KKigYP9yOYwSmZYUPOFYHn1/GEMxbMpf9xFgR/mq','0','0','127.0.0.1','2025-06-04 16:40:57','','2025-06-04 16:39:07','','2025-06-09 14:17:23',''),(109,101,'test','test','00','test@1.com','','2','','$2b$12$LPbzrBh/RcuKe9EjsmihVew4Dg481qzFUNlx3Vt85wNoQUN1a6LTK','0','0','',NULL,'','2025-06-09 15:25:52','','2025-06-10 11:19:03',''),(110,102,'myxz','myxz','00','myxz@myxz.xyz','','2','','$2b$12$aOqXXWLSxD8exqJNvLCzA.bsBh3WodqQyiQUGmlKVvSXzTTutis5y','0','0','127.0.0.1','2025-06-09 15:33:57','','2025-06-09 15:33:55','','2025-06-11 17:19:37','');
+INSERT INTO `sys_user` VALUES (1,100,'admin','管理员','00','admin@example.com','15888888888','0','','$2b$12$w89tXi4TVEnRLShLuEFEoOK8vdRUaADSCRhKfTXLxOG4rS8Ht44W6','0','0','127.0.0.1','2025-06-11 16:22:22','admin','2025-06-03 10:45:00','','2025-06-12 15:12:37','管理员'),(100,100,'myxzadmin','管理员','00','myxz@example.com','13800138000','0','','$2b$12$7lVHEKsRgIiD1KKigYP9yOYwSmZYUPOFYHn1/GEMxbMpf9xFgR/mq','0','0','127.0.0.1','2025-06-04 16:40:57','','2025-06-04 16:39:07','','2025-06-09 14:17:23',''),(109,101,'test','test','00','test@1.com','','2','','$2b$12$LPbzrBh/RcuKe9EjsmihVew4Dg481qzFUNlx3Vt85wNoQUN1a6LTK','0','0','',NULL,'','2025-06-09 15:25:52','','2025-06-10 11:19:03',''),(110,102,'myxz','myxz','00','myxz@myxz.xyz','','2','','$2b$12$aOqXXWLSxD8exqJNvLCzA.bsBh3WodqQyiQUGmlKVvSXzTTutis5y','0','0','127.0.0.1','2025-06-09 15:33:57','','2025-06-09 15:33:55','','2025-06-11 17:19:37','');
 /*!40000 ALTER TABLE `sys_user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -568,4 +647,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-06-12 15:07:13
+-- Dump completed on 2025-06-12 16:05:49

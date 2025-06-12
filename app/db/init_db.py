@@ -5,6 +5,7 @@ from app.models.system.user import SysUser
 from app.models.system.role import SysRole, sys_role_menu, sys_user_role, sys_role_dept
 from app.models.system.dept import SysDept
 from app.models.system.post import sys_user_post
+from app.models.tool.gen import GenTable, GenTableColumn
 from app.utils.password import get_password_hash
 
 logging.basicConfig(level=logging.INFO)
@@ -107,4 +108,24 @@ def init_data(db: Session) -> None:
     admin.roles = [role]
     db.commit()
     
-    logger.info("基础数据初始化完成") 
+    logger.info("基础数据初始化完成")
+
+
+def init_gen_tables(db: Session) -> None:
+    """
+    初始化代码生成表结构
+    """
+    try:
+        # 检查是否已有代码生成表
+        gen_table_exists = db.query(GenTable).first() is not None
+        
+        if gen_table_exists:
+            logger.info("代码生成表已存在，跳过创建")
+            return
+        
+        # 从这里不创建表结构，因为表结构应该在应用启动时自动创建
+        # 或通过init_gen_tables.py脚本创建
+        logger.info("代码生成表需要手动创建，请运行init_gen_tables.py脚本")
+    except Exception as e:
+        logger.error(f"检查代码生成表出错: {e}")
+        logger.info("请运行init_gen_tables.py脚本创建代码生成表") 

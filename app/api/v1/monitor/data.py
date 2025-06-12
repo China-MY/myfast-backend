@@ -3,8 +3,8 @@ from typing import Any, Dict, List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, get_current_active_user, check_permissions
-from app.schemas.common import ResponseModel
+from app.api.deps import get_db, check_permissions
+from app.schemas.utils.common import ResponseModel
 from app.service.data_monitor import data_monitor_service
 
 router = APIRouter()

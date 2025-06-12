@@ -1,14 +1,13 @@
-from typing import Any, List
+from typing import Any
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, Path
-from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, get_current_active_user, check_permissions
-from app.crud.user import user
-from app.models.user import SysUser
-from app.schemas.user import User, UserCreate, UserUpdate
-from app.schemas.common import ResponseModel, PageResponseModel, PageInfo
+from app.crud.system.user import user
+from app.models.system.user import SysUser
+from app.schemas.system.user import User, UserCreate, UserUpdate
+from app.schemas.utils.common import ResponseModel, PageResponseModel, PageInfo
 
 router = APIRouter()
 

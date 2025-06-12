@@ -1,15 +1,14 @@
-from typing import Any, List, Optional
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Path
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, get_current_active_user, check_permissions
-from app.models.user import SysUser
-from app.crud.dict import dict_type as dict_type_crud
-from app.crud.dict import dict_data as dict_data_crud
-from app.schemas.dict import DictTypeCreate, DictTypeUpdate, DictTypeOut, DictDataCreate, DictDataUpdate, DictDataOut, DictTypeWithCountOut
-from app.schemas.dict import dict_type_to_dict, dict_data_to_dict
-from app.schemas.common import ResponseModel, PageResponseModel
+from app.api.deps import get_db
+from app.crud.system.dict import dict_type as dict_type_crud
+from app.crud.system.dict import dict_data as dict_data_crud
+from app.schemas.system.dict import DictTypeCreate, DictTypeUpdate, DictDataCreate, DictDataUpdate
+from app.schemas.system.dict import dict_type_to_dict, dict_data_to_dict
+from app.schemas.utils.common import ResponseModel, PageResponseModel
 from app.core.security import get_current_user_id
 
 router = APIRouter()

@@ -1,16 +1,14 @@
-from typing import Any, List, Optional, Dict, TypeVar, Generic, Type
+from typing import Any, Optional, Type
 import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from sqlalchemy.ext.declarative import DeclarativeMeta
-import json
 
 from app.api.deps import get_db, get_current_active_user, check_permissions
-from app.models.user import SysUser
-from app.schemas.job import JobCreate, JobUpdate, JobOut, JobLogOut
-from app.schemas.common import ResponseModel, PageResponseModel, PageInfo
-from app.service.job import job_service
+from app.models.system.user import SysUser
+from app.schemas.monitor.job import JobCreate, JobUpdate, JobOut
+from app.schemas.utils.common import ResponseModel
+from app.service.monitor.job import job_service
 
 
 def sqlalchemy_to_pydantic(obj: Any, model_class: Type) -> Any:
@@ -67,7 +65,7 @@ def sqlalchemy_to_pydantic(obj: Any, model_class: Type) -> Any:
                 # 对于普通元组，尝试识别属性值
                 # 根据数据库表的结构尝试按顺序赋值
                 print(f"[DEBUG] 处理普通元组，假设顺序与属性按SQLAlchemy模型顺序匹配")
-                from app.models.job import SysJob
+                from app.models.monitor.job import SysJob
                 # 获取SysJob表的所有列名
                 columns = [c.name for c in SysJob.__table__.columns]
                 

@@ -45,9 +45,9 @@ from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.models.user import SysUser
-from app.schemas.token import TokenPayload
-from app.crud.user import user as crud_user
+from app.models.system.user import SysUser
+from app.schemas.utils.token import TokenPayload
+from app.crud.system.user import user as crud_user
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/auth/login"

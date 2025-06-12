@@ -4,11 +4,10 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, get_current_active_user, check_permissions
-from app.models.user import SysUser
-from app.models.role import SysRole
-from app.schemas.role import RoleCreate, RoleUpdate, RoleOut, RoleWithMenu
-from app.schemas.common import ResponseModel, PageResponseModel
-from app.crud.role import role as role_crud
+from app.models.system.user import SysUser
+from app.schemas.system.role import RoleCreate, RoleUpdate, RoleOut
+from app.schemas.utils.common import ResponseModel
+from app.crud.system.role import role as role_crud
 
 router = APIRouter()
 

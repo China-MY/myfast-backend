@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Optional, Union
 from datetime import datetime
 from sqlalchemy.orm import Session
 
-from app.entity.sys_dept import SysDept
+from app.models.system.dept import SysDept
 from app.common.constants import StatusEnum, DeleteFlagEnum
 from app.common.exception import BusinessException
 

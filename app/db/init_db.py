@@ -1,14 +1,10 @@
 import logging
-import os
-import pymysql
 from sqlalchemy.orm import Session
 
-from app.db.session import Base, engine
-from app.models.user import SysUser
-from app.models.role import SysRole, sys_role_menu, sys_user_role, sys_role_dept
-from app.models.menu import SysMenu
-from app.models.dept import SysDept
-from app.models.post import SysPost, sys_user_post
+from app.models.system.user import SysUser
+from app.models.system.role import SysRole, sys_role_menu, sys_user_role, sys_role_dept
+from app.models.system.dept import SysDept
+from app.models.system.post import sys_user_post
 from app.utils.password import get_password_hash
 
 logging.basicConfig(level=logging.INFO)

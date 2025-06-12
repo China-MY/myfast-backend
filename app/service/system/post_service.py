@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Optional, Union
 from datetime import datetime
 from sqlalchemy.orm import Session
 
-from app.entity.sys_post import SysPost
+from app.models.system.post import SysPost
 from app.common.constants import StatusEnum
 from app.common.exception import BusinessException
 

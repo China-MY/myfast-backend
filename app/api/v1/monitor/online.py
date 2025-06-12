@@ -1,14 +1,14 @@
-from typing import Any, List, Optional
+from typing import Any, Optional
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, get_current_active_user, check_permissions
-from app.models.user import SysUser
-from app.schemas.online import OnlineUserOut, ForceLogoutParams
-from app.schemas.common import ResponseModel, PageResponseModel
-from app.service.online import online_service
+from app.models.system.user import SysUser
+from app.schemas.monitor.online import ForceLogoutParams
+from app.schemas.utils.common import ResponseModel
+from app.service.monitor.online import online_service
 
 router = APIRouter()
 

@@ -9,8 +9,8 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.core.config import settings
 from app.core.security import get_password_hash
-from app.entity.sys_user import SysUser
-from app.schema.token import TokenPayload
+from app.models.system.user import SysUser
+from app.schemas.utils.token import TokenPayload
 
 # OAuth2密码模式
 oauth2_scheme = OAuth2PasswordBearer(

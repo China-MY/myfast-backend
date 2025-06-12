@@ -8,13 +8,13 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, get_current_active_user
 from app.core.config import settings
-from app.crud.user import user
-from app.models.user import SysUser
-from app.schemas.token import Token
-from app.schemas.user import UserLogin, UserInfo, User
-from app.schemas.common import ResponseModel
+from app.crud.system.user import user
+from app.models.system.user import SysUser
+from app.schemas.utils.token import Token
+from app.schemas.system.user import UserLogin, UserInfo
+from app.schemas.utils.common import ResponseModel
 from app.utils.jwt import create_access_token
-from app.service.online import online_service
+from app.service.monitor.online import online_service
 from app.core.security import verify_password
 
 # 创建日志记录器

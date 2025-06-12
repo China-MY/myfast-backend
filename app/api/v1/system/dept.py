@@ -4,11 +4,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, get_current_active_user, check_permissions
-from app.models.user import SysUser
-from app.models.dept import SysDept
-from app.schemas.dept import DeptCreate, DeptUpdate, DeptOut, DeptTree
-from app.schemas.common import ResponseModel
-from app.crud.dept import dept as dept_crud
+from app.models.system.user import SysUser
+from app.schemas.system.dept import DeptCreate, DeptUpdate, DeptOut, DeptTree
+from app.schemas.utils.common import ResponseModel
+from app.crud.system.dept import dept as dept_crud
 
 router = APIRouter()
 

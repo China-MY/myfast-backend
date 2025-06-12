@@ -1,12 +1,11 @@
 from typing import Any
 
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 
-from app.api.deps import get_db, get_current_active_user, check_permissions
-from app.schemas.server import ServerInfo
-from app.schemas.common import ResponseModel
-from app.service.server import server_service
+from app.api.deps import check_permissions
+from app.schemas.monitor.server import ServerInfo
+from app.schemas.utils.common import ResponseModel
+from app.service.monitor.server import server_service
 
 router = APIRouter()
 

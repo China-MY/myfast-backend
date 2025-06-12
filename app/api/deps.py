@@ -1,4 +1,4 @@
-from typing import Generator, Optional
+from typing import Generator
 
 from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
@@ -9,10 +9,10 @@ from datetime import datetime
 
 from app.db.session import SessionLocal
 from app.core.config import settings
-from app.models.user import SysUser
-from app.crud.user import user
-from app.schemas.token import TokenPayload
-from app.service.online import online_service, ONLINE_KEY_PREFIX
+from app.models.system.user import SysUser
+from app.crud.system.user import user
+from app.schemas.utils.token import TokenPayload
+from app.service.monitor.online import ONLINE_KEY_PREFIX
 from app.core.redis import redis_client
 import json
 

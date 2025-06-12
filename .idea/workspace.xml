@@ -4,11 +4,113 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="34fb14a6-8548-4aa8-8f03-de99e814f2f0" name="更改" comment="20250611-修复在线用户" />
+    <list default="true" id="34fb14a6-8548-4aa8-8f03-de99e814f2f0" name="更改" comment="20250611-修复在线用户">
+      <change afterPath="$PROJECT_DIR$/app/crud/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/crud/monitor/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/crud/system/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/crud/utils/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/models/monitor/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/models/system/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/models/utils/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/schemas/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/schemas/monitor/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/schemas/system/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/schemas/utils/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/service/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/service/monitor/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/CopilotChatHistory.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/CopilotChatHistory.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/add_test_job.sql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/deps.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/deps.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/api.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/auth/login.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/auth/login.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/auth/logout.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/auth/logout.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/auth/register.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/auth/register.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/endpoints/auth.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/endpoints/depts.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/endpoints/menus.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/endpoints/posts.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/endpoints/roles.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/endpoints/users.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/monitor/cache.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/monitor/cache.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/monitor/data.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/monitor/data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/monitor/job.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/monitor/job.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/monitor/online.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/monitor/online.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/monitor/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/monitor/server.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/system/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/system/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/system/dept.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/system/dept.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/system/dict.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/system/dict.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/system/menu.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/system/menu.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/system/post.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/system/post.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/system/profile.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/system/profile.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/system/role.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/system/role.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/system/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/system/user.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/core/deps.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/core/deps.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/core/security.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/core/security.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/crud/base.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/crud/utils/base.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/crud/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/crud/utils/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/crud/dept.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/crud/system/dept.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/crud/dict.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/crud/system/dict.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/crud/job.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/crud/monitor/job.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/crud/menu.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/crud/system/menu.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/crud/online.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/crud/monitor/online.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/crud/post.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/crud/system/post.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/crud/role.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/crud/system/role.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/crud/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/crud/system/user.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/db/init_db.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/db/init_db.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/utils/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models/dept.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/system/dept.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models/dict.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/system/dict.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models/job.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/monitor/job.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models/menu.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/system/menu.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models/online.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/monitor/online.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models/post.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/system/post.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models/relation.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/utils/relation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models/role.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/system/role.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/system/user.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schema/dept.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schema/menu.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schema/post.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schema/role.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schema/token.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schema/user.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/common.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/utils/common.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/utils/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/dept.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/system/dept.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/dict.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/system/dict.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/job.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/monitor/job.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/menu.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/system/menu.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/online.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/monitor/online.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/post.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/system/post.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/role.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/system/role.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/monitor/server.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/token.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/utils/token.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/system/user.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/service/cache.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/service/data_monitor.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/service/job.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/service/monitor/job.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/service/online.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/service/monitor/online.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/service/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/service/monitor/server.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/service/system/dept_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/service/system/dept_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/service/system/menu_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/service/system/menu_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/service/system/post_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/service/system/post_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/service/system/role_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/service/system/role_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/service/system/user_service.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/service/system/user_service.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/debug_post.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -30,6 +132,9 @@
   &quot;associatedIndex&quot;: 8
 }</component>
   <component name="ProjectId" id="2yIv2e7E1Zy4HuMq5fy9vtuRfLX" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -50,6 +155,15 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="E:\WORK\MYFASTAPI\myfast-backend\app\models\system" />
+      <recent name="E:\WORK\MYFASTAPI\myfast-backend\app\models\utils" />
+      <recent name="E:\WORK\MYFASTAPI\myfast-backend\app\models\monitor" />
+      <recent name="E:\WORK\MYFASTAPI\myfast-backend\app\crud\system" />
+      <recent name="E:\WORK\MYFASTAPI\myfast-backend\app\crud\monitor" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="myfast-backend" />
@@ -98,7 +212,9 @@
       <workItem from="1749534698025" duration="11660000" />
       <workItem from="1749604159535" duration="10000" />
       <workItem from="1749608187894" duration="3562000" />
-      <workItem from="1749619893728" duration="9496000" />
+      <workItem from="1749619893728" duration="9742000" />
+      <workItem from="1749689458082" duration="6081000" />
+      <workItem from="1749706291555" duration="3673000" />
     </task>
     <task id="LOCAL-00001" summary="20250610-完善岗位管理">
       <option name="closed" value="true" />
@@ -188,7 +304,15 @@
       <option name="project" value="LOCAL" />
       <updated>1749634047081</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="20250611-修复在线用户">
+      <option name="closed" value="true" />
+      <created>1749634309352</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1749634309352</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -209,6 +333,6 @@
     <option name="LAST_COMMIT_MESSAGE" value="20250611-修复在线用户" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/myfast_backend$main.coverage" NAME="main 覆盖结果" MODIFIED="1749630771604" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
+    <SUITE FILE_PATH="coverage/myfast_backend$main.coverage" NAME="main 覆盖结果" MODIFIED="1749709104285" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/app" />
   </component>
 </project>

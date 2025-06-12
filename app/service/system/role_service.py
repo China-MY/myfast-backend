@@ -2,10 +2,10 @@ from typing import Any, Dict, List, Optional, Union
 from datetime import datetime
 from sqlalchemy.orm import Session
 
-from app.entity.sys_role import SysRole
-from app.entity.sys_menu import SysMenu
-from app.entity.sys_dept import SysDept
-from app.schema.role import RoleCreate, RoleUpdate
+from app.models.system.role import SysRole
+from app.models.system.menu import SysMenu
+from app.models.system.dept import SysDept
+from app.schemas.system.role import RoleCreate, RoleUpdate
 from app.common.exception import BusinessException
 from app.common.constants import StatusEnum, DeleteFlagEnum
 

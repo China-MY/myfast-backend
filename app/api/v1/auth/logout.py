@@ -5,9 +5,9 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, get_current_user
-from app.models.user import SysUser
-from app.schemas.common import ResponseModel
-from app.service.online import online_service
+from app.models.system.user import SysUser
+from app.schemas.utils.common import ResponseModel
+from app.service.monitor.online import online_service
 
 router = APIRouter()
 

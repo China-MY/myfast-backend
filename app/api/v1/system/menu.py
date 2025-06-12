@@ -4,11 +4,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, get_current_active_user, check_permissions
-from app.models.user import SysUser
-from app.models.menu import SysMenu
-from app.schemas.menu import MenuCreate, MenuUpdate, MenuOut, MenuTree
-from app.schemas.common import ResponseModel
-from app.crud.menu import menu as menu_crud
+from app.models.system.user import SysUser
+from app.schemas.system.menu import MenuCreate, MenuUpdate, MenuOut, MenuTree
+from app.schemas.utils.common import ResponseModel
+from app.crud.system.menu import menu as menu_crud
 
 router = APIRouter()
 

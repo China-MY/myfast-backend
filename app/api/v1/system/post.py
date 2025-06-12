@@ -4,11 +4,10 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, get_current_active_user, check_permissions
-from app.models.user import SysUser
-from app.models.post import SysPost
-from app.schemas.post import PostCreate, PostUpdate, PostOut
-from app.schemas.common import ResponseModel, PageResponseModel, PageInfo
-from app.crud.post import post as post_crud
+from app.models.system.user import SysUser
+from app.schemas.system.post import PostCreate, PostUpdate, PostOut
+from app.schemas.utils.common import ResponseModel, PageResponseModel, PageInfo
+from app.crud.system.post import post as post_crud
 
 router = APIRouter()
 

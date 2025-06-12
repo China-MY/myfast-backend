@@ -4,10 +4,10 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 
 from app.core.security import get_password_hash, verify_password
-from app.entity.sys_user import SysUser
-from app.entity.sys_role import SysRole
-from app.entity.sys_post import SysPost
-from app.schema.user import UserCreate, UserUpdate
+from app.models.system.user import SysUser
+from app.models.system.role import SysRole
+from app.models.system.post import SysPost
+from app.schemas.system.user import UserCreate, UserUpdate
 from app.common.exception import BusinessException
 from app.common.constants import UserStatusEnum, DeleteFlagEnum
 

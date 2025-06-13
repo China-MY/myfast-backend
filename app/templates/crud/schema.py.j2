@@ -4,29 +4,34 @@ from pydantic import BaseModel, Field
 
 # 基础模型
 class {{ table.class_name }}Base(BaseModel):
+    """{{ table.table_comment or table.class_name }}基础信息"""
     {% for column in columns %}
-    {% if column.is_pk != '1' and column.field_name != 'create_time' and column.field_name != 'update_time' %}
-    {{ column.field_name }}: {% if column.is_required != '1' %}Optional[{% endif %}{{ column.python_type | default('str') }}{% if column.is_required != '1' %}]{% endif %} = {% if column.is_required != '1' %}None{% else %}Field(...){% endif %}{% if column.column_comment %} # {{ column.column_comment }}{% endif %}
+    {% if column.is_pk != '1' %}
+    {{ column.field_name }}: {% if column.is_required != '1' %}Optional[{% endif %}{{ column.python_type }}{% if column.is_required != '1' %}]{% endif %} = {% if column.is_required == '1' %}Field(..., description="{{ column.column_comment }}"){% else %}Field(None, description="{{ column.column_comment }}"){% endif %}
     {% endif %}
     {% endfor %}
 
 # 创建模型
 class {{ table.class_name }}Create({{ table.class_name }}Base):
+    """创建{{ table.table_comment or table.class_name }}"""
     pass
 
 # 更新模型
 class {{ table.class_name }}Update({{ table.class_name }}Base):
+    """更新{{ table.table_comment or table.class_name }}"""
     pass
 
 # 数据库模型
 class {{ table.class_name }}InDB({{ table.class_name }}Base):
-    id: int
+    """数据库中的{{ table.table_comment or table.class_name }}"""
     {% for column in columns %}
-    {% if column.field_name == 'create_time' or column.field_name == 'update_time' %}
-    {{ column.field_name }}: Optional[datetime] = None
+    {% if column.is_pk == '1' %}
+    {{ column.field_name }}: {{ column.python_type }}
     {% endif %}
     {% endfor %}
-
+    create_time: Optional[datetime] = None
+    update_time: Optional[datetime] = None
+    
     class Config:
         orm_mode = True
 

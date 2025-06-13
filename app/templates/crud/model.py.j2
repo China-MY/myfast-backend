@@ -11,5 +11,5 @@ class {{ table.class_name }}(Base):
     __tablename__ = "{{ table.table_name }}"
     
     {% for column in columns %}
-    {{ column.field_name }} = Column({{ column.python_type | default('String') }}{% if column.column_type and column.column_type.startswith('varchar') %}({{ column.column_type.replace('varchar(', '').replace(')', '') }}){% endif %}, {% if column.is_pk == '1' %}primary_key=True, {% endif %}{% if column.is_increment == '1' %}autoincrement=True, {% endif %}{% if column.is_required == '1' %}nullable=False, {% endif %}comment="{{ column.column_comment }}")
+    {{ column.field_name }} = Column({{ column.python_type | title }}{% if column.column_type %}({{ column.column_type.replace('(', ', ').replace(')', '') }}){% endif %}, {% if column.is_pk == '1' %}primary_key=True, {% endif %}{% if column.is_pk == '1' %}index=True, {% endif %}{% if column.is_increment == '1' %}autoincrement=True, {% endif %}{% if column.is_required == '1' %}nullable=False, {% endif %}comment="{{ column.column_comment }}")
     {% endfor %} 

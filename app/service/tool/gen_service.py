@@ -154,11 +154,25 @@ class GenService:
             # 记录已成功写入的文件
             written_files = []
             
+            # 创建frontend和backend目录
+            frontend_dir = os.path.join(temp_dir, "frontend")
+            backend_dir = os.path.join(temp_dir, "backend")
+            os.makedirs(frontend_dir, exist_ok=True)
+            os.makedirs(backend_dir, exist_ok=True)
+            logger.info(f"创建前后端目录: {frontend_dir}, {backend_dir}")
+            
             # 写入文件
             for code_file in code_files:
                 try:
+                    file_path = code_file.file_path
+                    # 根据文件类型决定放入哪个目录
+                    if file_path.endswith('.vue') or file_path.endswith('.js'):
+                        target_dir = frontend_dir
+                    else:
+                        target_dir = backend_dir
+                    
                     # 处理路径分隔符
-                    file_path = os.path.join(temp_dir, code_file.file_path.replace('/', os.path.sep))
+                    file_path = os.path.join(target_dir, file_path.replace('/', os.path.sep))
                     
                     # 确保目录存在
                     os.makedirs(os.path.dirname(file_path), exist_ok=True)
@@ -180,12 +194,25 @@ class GenService:
             try:
                 with zipfile.ZipFile(zip_filepath, 'w', zipfile.ZIP_DEFLATED) as zipf:
                     file_count = 0
-                    for file_path in written_files:
-                        if os.path.isfile(file_path) and os.path.basename(file_path) != zip_filename:
-                            arcname = os.path.relpath(file_path, temp_dir)
-                            zipf.write(file_path, arcname)
-                            file_count += 1
-                            logger.info(f"添加文件到ZIP: {arcname}")
+                    # 添加frontend目录
+                    if os.path.exists(frontend_dir) and os.listdir(frontend_dir):
+                        for root, _, files in os.walk(frontend_dir):
+                            for file in files:
+                                file_path = os.path.join(root, file)
+                                arcname = os.path.join("frontend", os.path.relpath(file_path, frontend_dir))
+                                zipf.write(file_path, arcname)
+                                file_count += 1
+                                logger.info(f"添加文件到ZIP: {arcname}")
+                    
+                    # 添加backend目录
+                    if os.path.exists(backend_dir) and os.listdir(backend_dir):
+                        for root, _, files in os.walk(backend_dir):
+                            for file in files:
+                                file_path = os.path.join(root, file)
+                                arcname = os.path.join("backend", os.path.relpath(file_path, backend_dir))
+                                zipf.write(file_path, arcname)
+                                file_count += 1
+                                logger.info(f"添加文件到ZIP: {arcname}")
                     
                     logger.info(f"ZIP文件创建完成，包含 {file_count} 个文件")
                 
@@ -229,6 +256,13 @@ class GenService:
         logger.info(f"创建临时目录: {temp_dir}")
         
         try:
+            # 创建frontend和backend目录
+            frontend_dir = os.path.join(temp_dir, "frontend")
+            backend_dir = os.path.join(temp_dir, "backend")
+            os.makedirs(frontend_dir, exist_ok=True)
+            os.makedirs(backend_dir, exist_ok=True)
+            logger.info(f"创建前后端目录: {frontend_dir}, {backend_dir}")
+            
             zip_filename = f"code_{datetime.now().strftime('%Y%m%d%H%M%S')}.zip"
             zip_filepath = os.path.join(temp_dir, zip_filename)
             logger.info(f"开始创建ZIP文件: {zip_filepath}")
@@ -263,8 +297,11 @@ class GenService:
                                 # 文件内容
                                 content = code_file.file_content.encode('utf-8')
                                 
-                                # ZIP文件中的路径
-                                arcname = f"{table_dir}/{code_file.file_path}"
+                                # 根据文件类型决定放入哪个目录
+                                if code_file.file_path.endswith('.vue') or code_file.file_path.endswith('.js'):
+                                    arcname = f"frontend/{table_dir}/{code_file.file_path}"
+                                else:
+                                    arcname = f"backend/{table_dir}/{code_file.file_path}"
                                 
                                 # 添加到ZIP
                                 zipf.writestr(arcname, content)

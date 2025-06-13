@@ -2,7 +2,7 @@ from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, and_, or_, desc
 
 from app.db.base_class import Base
 from app.models.{{ table.module_name }}.{{ table.business_name }} import {{ table.class_name }}
@@ -31,7 +31,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         """
         获取多个对象
         """
-        return db.query(self.model).offset(skip).limit(limit).all()
+        return db.query(self.model).order_by(desc(self.model.create_time)).offset(skip).limit(limit).all()
 
     def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:
         """

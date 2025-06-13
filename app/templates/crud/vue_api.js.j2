@@ -3,7 +3,7 @@ import request from '@/request'
 // 查询{{ table.table_comment or table.class_name }}列表
 export function list{{ table.class_name }}(query) {
   return request({
-    url: '/{{ table.module_name }}/{{ table.business_name }}/list',
+    url: '/{{ table.module_name }}/{{ table.business_name }}',
     method: 'get',
     params: query
   })

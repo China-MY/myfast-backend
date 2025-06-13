@@ -199,6 +199,7 @@ def generate_code(
     *,
     db: Session = Depends(deps.get_db),
     id: int = Path(..., gt=0),
+    token: str = None,
 ) -> Any:
     """
     生成代码
@@ -214,7 +215,10 @@ def generate_code(
         headers = {
             "Content-Disposition": f'attachment; filename="{zip_filename}"',
             "Content-Type": "application/zip",
-            "Access-Control-Expose-Headers": "Content-Disposition"
+            "Access-Control-Expose-Headers": "Content-Disposition",
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0"
         }
         
         return StreamingResponse(
@@ -230,19 +234,37 @@ def generate_code(
 def batch_generate_code(
     *,
     db: Session = Depends(deps.get_db),
-    req: GenCodeRequest,
+    req: GenCodeRequest = None,
+    table_ids: str = Form(None),
+    token: str = Form(None),
 ) -> Any:
     """
     批量生成代码
     """
     try:
-        zip_content, zip_filename = gen_service.generate_batch_code(db, req.table_ids)
+        # 处理表单提交的情况
+        ids_list = []
+        if req and req.table_ids:
+            ids_list = req.table_ids
+        elif table_ids:
+            try:
+                ids_list = json.loads(table_ids)
+            except:
+                raise HTTPException(status_code=400, detail="无效的表ID格式")
+        
+        if not ids_list:
+            raise HTTPException(status_code=400, detail="未提供表ID")
+            
+        zip_content, zip_filename = gen_service.generate_batch_code(db, ids_list)
         
         # 返回ZIP文件
         headers = {
             "Content-Disposition": f'attachment; filename="{zip_filename}"',
             "Content-Type": "application/zip",
-            "Access-Control-Expose-Headers": "Content-Disposition"
+            "Access-Control-Expose-Headers": "Content-Disposition",
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0"
         }
         
         return StreamingResponse(

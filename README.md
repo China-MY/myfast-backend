@@ -244,6 +244,47 @@ uvicorn app.main:app --reload
   - 任务执行/暂停
   - 执行日志查询
 
+## 📸 项目截图
+
+### API文档
+![API文档](./docs/1.png)
+
+### 登录接口
+![登录接口](./docs/2.png)
+
+### 用户管理API
+![用户管理API](./docs/3.png)
+
+### 角色管理API
+![角色管理API](./docs/4.png)
+
+### 菜单管理API
+![菜单管理API](./docs/5.png)
+
+### 字典管理API
+![字典管理API](./docs/6.png)
+
+### 部门管理API
+![部门管理API](./docs/7.png)
+
+### 岗位管理API
+![岗位管理API](./docs/8.png)
+
+### 参数设置API
+![参数设置API](./docs/9.png)
+
+### 在线用户API
+![在线用户API](./docs/10.png)
+
+### 服务器监控API
+![服务器监控API](./docs/11.png)
+
+### 缓存监控API
+![缓存监控API](./docs/12.png)
+
+### 定时任务API
+![定时任务API](./docs/13.png)
+
 ## 💻 开发指南
 
 ### 添加新的 API 端点
